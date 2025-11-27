@@ -1,0 +1,53 @@
+@layer theme, base, antd, components, utilities;
+
+@import 'tailwindcss';
+
+@plugin "./../../plugins/tailwind-color";
+@plugin "./../../plugins/tailwind-slider";
+@plugin "./../../plugins/tailwind-scrollbar";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  body {
+    @apply relative bg-white font-['Poppins']!;
+  }
+  * {
+    @apply scrollbar:size-1 scrollbar-track:bg-gray-300 scrollbar-thumb:bg-app-500 dark:scrollbar-thumb:bg-zinc-900 dark:scrollbar-track:bg-zinc-600;
+  }
+  label {
+    @apply font-bold text-gray-700 text-sm mb-1 block;
+  }
+  .ant-alert-message {
+    @apply mb-0! font-bold;
+  }
+  .ant-alert-message,
+  .ant-alert-description {
+    @apply text-[12px]! text-gray-500!;
+  }
+}
+@layer components {
+  .flex-center {
+    @apply flex items-center justify-center;
+  }
+  .ant-form-item-inline {
+    @apply w-full;
+  }
+  .ant-form-item-inline .ant-form-item-control {
+    @apply grow-[unset];
+  }
+  .ant-form-item-inline .ant-form-item-label {
+    @apply flex-1;
+  }
+}
+
+@layer utilities {
+  .underline {
+    @apply hover:text-app-500 decoration-app-500 dark:decoration-app-400 dark:hover:decoration-app-500 dark:focus:ring-app-400/40 rounded-sm underline decoration-2 underline-offset-2 transition duration-100;
+  }
+  .ant-app {
+    @apply flex h-[inherit] flex-col;
+  }
+  .glass {
+    @apply min-h-[70px] w-full rounded-md bg-linear-to-r from-transparent to-white/30 p-8 mix-blend-hard-light shadow-md backdrop-blur-lg;
+  }
+}

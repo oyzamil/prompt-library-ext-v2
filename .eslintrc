@@ -1,0 +1,33 @@
+{
+  "root": true,
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true,
+  },
+  "extends": ["eslint:recommended", "plugin:react/recommended", "plugin:react-hooks/recommended", "plugin:@typescript-eslint/recommended", "prettier"],
+  "plugins": ["simple-import-sort", "@typescript-eslint", "react"],
+  "rules": {
+    // ✅ Automatically sort imports
+    "simple-import-sort/imports": [
+      "warn",
+      {
+        "groups": [["^react", "^next", "^vue"], ["^node:", "^[a-z]"], ["^wxt/(.*)$"], ["^@/(.*)$"], ["^[./]"]],
+      },
+    ],
+    "simple-import-sort/exports": "warn",
+
+    // 🧹 Disable ESLint’s built-in import sorting (avoid conflict)
+    "import/order": "off",
+    "sort-imports": "off",
+
+    // 🧠 General cleanup
+    "react/react-in-jsx-scope": "off",
+    "@typescript-eslint/no-unused-vars": "warn",
+  },
+  "settings": {
+    "react": {
+      "version": "detect",
+    },
+  },
+}
