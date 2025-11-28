@@ -3,8 +3,8 @@
  * @returns 样式字符串
  */
 export function getPromptSelectorStyles(): string {
-    return `
-    /* 基础样式重置 */
+  return `
+    /* Basic style reset */
     * {
       box-sizing: border-box !important;
       margin: 0 !important;
@@ -13,7 +13,7 @@ export function getPromptSelectorStyles(): string {
       text-autospace: normal !important;
     }
     
-    /* 主题相关变量 - 亮色模式默认值 */
+    /* Theme related variables - default value of light mode */
     :host {
       --qp-bg-overlay: rgba(0, 0, 0, 0.5);
       --qp-bg-primary: #ffffff;
@@ -36,7 +36,7 @@ export function getPromptSelectorStyles(): string {
       --qp-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     }
 
-    /* 暗黑模式变量 */
+    /* Dark mode variables */
     :host([data-theme="dark"]) {
       --qp-bg-overlay: rgba(0, 0, 0, 0.7);
       --qp-bg-primary: #1f2937;
@@ -58,7 +58,7 @@ export function getPromptSelectorStyles(): string {
       --qp-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.18);
     }
     
-    /* 移植原来的样式 */
+    /* Migrate the original style */
     .qp-fixed {
       position: fixed !important;
     }
@@ -94,7 +94,7 @@ export function getPromptSelectorStyles(): string {
       z-index: 2147483647 !important;
     }
     
-    /* 主容器样式 */
+    /* Main container style */
     .qp-modal-container {
       backdrop-filter: blur(8px) !important;
       background-color: var(--qp-bg-overlay) !important;
@@ -103,7 +103,7 @@ export function getPromptSelectorStyles(): string {
       height: 100% !important;
     }
 
-    /* 弹窗主体样式 */
+    /* Pop-up window body style */
     .qp-modal {
       border-radius: 12px !important;
       overflow: hidden !important;
@@ -120,7 +120,7 @@ export function getPromptSelectorStyles(): string {
       max-height: 80vh !important;
     }
     
-    /* 弹窗头部样式 */
+    /* Pop-up window header style */
     .qp-modal-header {
       display: flex !important;
       align-items: center !important;
@@ -146,7 +146,7 @@ export function getPromptSelectorStyles(): string {
       pointer-events: none !important;
     }
 
-    /* 数据统计信息样式 */
+    /* Data statistics information style */
     .qp-stats {
       color: rgba(255, 255, 255, 0.85) !important;
       font-size: 12px !important;
@@ -155,7 +155,7 @@ export function getPromptSelectorStyles(): string {
       margin-top: 12px !important;
     }
 
-    /* 底部状态栏样式 */
+    /* Bottom status bar style */
     .qp-modal-footer {
       padding: 10px 19px !important;
       background-color: var(--qp-bg-secondary) !important;
@@ -176,7 +176,7 @@ export function getPromptSelectorStyles(): string {
       border-top: 1px solid rgba(124, 58, 237, 0.1) !important;
     }
 
-    /* 弹窗内容样式 */
+    /* Pop-up window content style */
     .qp-modal-content {
       padding: 0 !important;
       max-height: none !important;
@@ -192,7 +192,7 @@ export function getPromptSelectorStyles(): string {
       -webkit-overflow-scrolling: touch !important;
     }
 
-    /* 提示项样式 */
+    /* Prompt item style */
     .qp-prompt-item {
       padding: 12px 20px !important;
       border-left: 2px solid transparent !important;
@@ -207,7 +207,7 @@ export function getPromptSelectorStyles(): string {
       margin-bottom: 0 !important;
     }
 
-    /* 只在非键盘导航模式下显示hover效果 */
+    /* Only display the hover effect in non-keyboard navigation mode */
     :host(:not([data-keyboard-nav])) .qp-prompt-item:hover {
       background-color: var(--qp-bg-hover) !important;
       transform: translateX(1px) !important;
@@ -220,13 +220,13 @@ export function getPromptSelectorStyles(): string {
       position: relative !important;
     }
 
-    /* 在键盘导航模式下,hover效果被禁用 */
+    /* In keyboard navigation mode, the hover effect is disabled */
     .qp-keyboard-nav .qp-prompt-item:not(.qp-selected):hover {
       background-color: var(--qp-bg-primary) !important;
       transform: none !important;
     }
     
-    /* 提示标题 */
+    /* Prompt title */
     .qp-prompt-title {
       font-weight: 600 !important;
       font-size: 15px !important;
@@ -234,7 +234,7 @@ export function getPromptSelectorStyles(): string {
       margin-bottom: 3px !important;
     }
 
-    /* 提示内容预览 */
+    /* Prompt content preview */
     .qp-prompt-preview {
       color: var(--qp-text-secondary) !important;
       font-size: 14px !important;
@@ -245,7 +245,7 @@ export function getPromptSelectorStyles(): string {
       margin-bottom: 8px !important;
     }
 
-    /* 提示元数据区域（分类和标签） */
+    /* Prompt metadata area (category and tag) */
     .qp-prompt-meta {
       display: flex !important;
       align-items: center !important;
@@ -253,7 +253,7 @@ export function getPromptSelectorStyles(): string {
       flex-wrap: wrap !important;
     }
 
-    /* 分类显示 */
+    /* Classification display */
     .qp-prompt-category {
       display: flex !important;
       align-items: center !important;
@@ -280,13 +280,13 @@ export function getPromptSelectorStyles(): string {
       line-height: 1 !important;
     }
 
-    /* 暗色模式下的分类显示 */
+    /* Classification display in dark mode */
     :host([data-theme="dark"]) .qp-prompt-category {
       background-color: var(--qp-bg-secondary) !important;
       border-color: var(--qp-border-color) !important;
     }
 
-    /* 标签样式 */
+    /* Label style */
     .qp-tags-container {
       display: flex !important;
       flex-wrap: wrap !important;
@@ -305,7 +305,7 @@ export function getPromptSelectorStyles(): string {
       box-shadow: none !important;
     }
 
-    /* 空状态样式 */
+    /* Empty state style */
     .qp-empty-state {
       padding: 48px 32px !important;
       text-align: center !important;
@@ -340,13 +340,13 @@ export function getPromptSelectorStyles(): string {
       color: var(--qp-text-secondary) !important;
     }
     
-    /* 确保选中和未选中项的边框一致 */
+    /* Ensure that the borders of selected and unselected items are consistent */
     .qp-prompt-item,
     .qp-prompt-item.qp-selected {
       border-left-width: 2px !important;
     }
 
-    /* 搜索输入框样式 */
+    /* Search input box style */
     .qp-search-input {
       border: none !important;
       border-radius: 8px !important;
@@ -402,7 +402,7 @@ export function getPromptSelectorStyles(): string {
       box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1), 0 6px 16px rgba(124, 58, 237, 0.15), inset 0 1px 0 rgba(255, 255, 255, 1) !important;
     }
     
-    /* 搜索输入框暗黑模式 */
+    /* Search input box dark mode */
     :host([data-theme='dark']) .qp-search-input {
       background-color: rgba(15, 23, 42, 0.8) !important;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 1px 3px rgba(0, 0, 0, 0.2) !important;
@@ -426,7 +426,7 @@ export function getPromptSelectorStyles(): string {
       box-shadow: 0 0 0 3px rgba(157, 133, 242, 0.2), 0 6px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
     }
     
-    /* 滚动条样式 */
+    /* Scroll bar style */
     .qp-custom-scrollbar {
       scrollbar-width: thin !important;
       scrollbar-color: rgba(0, 0, 0, 0.2) transparent !important;
@@ -453,7 +453,7 @@ export function getPromptSelectorStyles(): string {
       cursor: pointer !important;
     }
 
-    /* 分类选择器样式 */
+    /* Category selector style */
     .qp-category-select {
       border: none !important;
       border-radius: 8px !important;
@@ -498,7 +498,7 @@ export function getPromptSelectorStyles(): string {
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
     }
 
-    /* 分类选择器亮色模式 */
+    /* Category selector bright mode */
     :host([data-theme='light']) .qp-category-select {
       background-color: rgba(255, 255, 255, 0.95) !important;
       background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z'/%3e%3c/svg%3e"), url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'/%3e%3c/svg%3e") !important;
@@ -523,7 +523,7 @@ export function getPromptSelectorStyles(): string {
       box-shadow: 0 2px 8px rgba(124, 58, 237, 0.2), inset 0 1px 0 rgba(255, 255, 255, 1) !important;
     }
 
-    /* 分类选择器暗黑模式 */
+    /* Category selector dark mode */
     :host([data-theme='dark']) .qp-category-select {
       background-color: rgba(15, 23, 42, 0.8) !important;
       background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239d85f2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z'/%3e%3c/svg%3e"), url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239d85f2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'/%3e%3c/svg%3e") !important;
@@ -548,7 +548,7 @@ export function getPromptSelectorStyles(): string {
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
     }
 
-    /* 布局相关样式 */
+    /* Layout related styles */
     .qp-w-full {
       width: 100% !important;
     }
@@ -565,7 +565,7 @@ export function getPromptSelectorStyles(): string {
       margin-top: 12px !important;
     }
 
-    /* 快捷键提示样式 */
+    /* Shortcut key prompt style */
     .qp-shortcut-hints {
       font-size: 11px !important;
       color: rgba(255, 255, 255, 0.75) !important;
@@ -585,7 +585,7 @@ export function getPromptSelectorStyles(): string {
       white-space: nowrap !important;
     }
 
-    /* 复制按钮样式 */
+    /* Copy button style */
     .qp-copy-button {
       display: flex !important;
       align-items: center !important;
@@ -613,4 +613,4 @@ export function getPromptSelectorStyles(): string {
       height: 18px !important;
     }
   `;
-} 
+}

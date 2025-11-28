@@ -1,8 +1,8 @@
 import React from 'react';
 
-// 移除了Google登录功能，创建空组件
+// Removed the Google login function and created an empty component
 const Auth: React.FC = () => {
-  return null; // 返回空组件
+  return null; // Return empty component
 };
 
-export default Auth; 
+export default Auth;

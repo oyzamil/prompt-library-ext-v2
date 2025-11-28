@@ -1,6 +1,6 @@
 import CategoryForm from './CategoryForm';
 import CategoryList from './CategoryList';
-import Modal from './Modal';
+import Modal from '../../../components/Modal';
 import ConfirmModal from './ConfirmModal';
 import { getCategories, addCategory, updateCategory, deleteCategory, getPromptCountByCategory } from '@/utils/categoryUtils';
 import { DEFAULT_CATEGORY_ID } from '@/utils/constants';

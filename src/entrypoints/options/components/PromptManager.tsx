@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import PromptForm from './PromptForm';
 import PromptList from './PromptList';
-import Modal from './Modal';
+import Modal from '../../../components/Modal';
 import { PromptItem, Category } from '@/utils/types';
 import { BROWSER_STORAGE_KEY, DEFAULT_CATEGORY_ID } from '@/utils/constants';
 import { getCategories, migratePromptsWithCategory } from '@/utils/categoryUtils';

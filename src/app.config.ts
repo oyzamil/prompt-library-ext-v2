@@ -9,17 +9,17 @@ export const config = {
   },
   SETTINGS: {
     theme: 'light' as 'light' | 'dark' | 'system',
-    email: null,
+    email: null as string | null,
     isLicensed: false,
     licenseModalVisible: false,
     chatListVisible: false,
     freeUserLimit: 5,
     licenseInfo: {
-      licenseKey: null,
-      subscriptionId: null,
-      status: null,
+      licenseKey: null as string | null,
+      subscriptionId: null as string | null,
+      status: null as string | null,
     },
-    placeholders: [],
+    placeholders: [] as string[],
   },
   ROUTES: {
     HOME: '/',

@@ -75,8 +75,8 @@ export const LicenseModal: React.FC = () => {
     } else {
       console.warn('License recheck failed:', result.error);
       await saveSettings({
+        isLicensed: false,
         licenseInfo: {
-          isLicensed: false,
           status: 'expired',
         },
       });
@@ -89,11 +89,11 @@ export const LicenseModal: React.FC = () => {
   return (
     <Modal
       title="Activate Subscription"
-      open={settings?.licenseInfo?.licenseModalVisible}
+      open={settings?.licenseModalVisible}
       footer={null}
       centered
       onCancel={() => {
-        saveSettings({ licenseInfo: { licenseModalVisible: false } });
+        saveSettings({ licenseModalVisible: false });
       }}
     >
       <p className="-mt-4 text-[13px]">

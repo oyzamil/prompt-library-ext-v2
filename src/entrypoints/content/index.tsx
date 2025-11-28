@@ -1,292 +1,269 @@
-import { storage } from '#imports'
-import { isDarkMode } from '@/utils/tools'
-import { showPromptSelector } from './components/PromptSelector'
-import { extractVariables } from './utils/variableParser'
-import { BROWSER_STORAGE_KEY } from '@/utils/constants'
-import { migratePromptsWithCategory } from '@/utils/categoryUtils'
-import type { EditableElement, PromptItem, PromptItemWithVariables } from '@/utils/types'
-import { t } from '@/utils/i18n'
+import { createAndMountUI, ThemeProvider } from '@/providers/ThemeProvider';
+import { t } from '@/utils/i18n';
+import { PromptSelector } from './components/PromptSelector';
+import { extractVariables } from './utils/variableParser';
+import { BROWSER_STORAGE_KEY } from '@/utils/constants';
 
 export default defineContentScript({
   matches: ['*://*/*'],
+  // 2. Set cssInjectionMode
+  cssInjectionMode: 'ui',
 
   async main(ctx) {
-    console.log(t('contentScriptLoaded'))
+    let lastInputValue = '';
+    let isPromptSelectorOpen = false;
 
-    // 记录上次输入的状态
-    let lastInputValue = ''
-    let isPromptSelectorOpen = false
-
-    // 设置容器的主题属性
-    const setThemeAttributes = (container: HTMLElement) => {
-      // 设置数据属性以指示当前主题
-      container.setAttribute('data-theme', isDarkMode() ? 'dark' : 'light')
-
-      // 监听主题变化
-      const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-      const handleThemeChange = (e: MediaQueryListEvent) => {
-        container.setAttribute('data-theme', e.matches ? 'dark' : 'light')
-      }
-
-      if (darkModeMediaQuery.addEventListener) {
-        darkModeMediaQuery.addEventListener('change', handleThemeChange)
-      }
-    }
-
-    // 获取 contenteditable 元素的内容
+    // Get the content of the contenteditable element
     const getContentEditableValue = (element: HTMLElement): string => {
-      return element.textContent || ''
-    }
+      return element.textContent || '';
+    };
 
-    // 设置 contenteditable 元素的内容
+    //Set the content of the contenteditable element
     const setContentEditableValue = (element: HTMLElement, value: string): void => {
-      element.textContent = value
-      // 触发 input 事件以通知其他监听器内容变化
-      const inputEvent = new InputEvent('input', { bubbles: true })
-      element.dispatchEvent(inputEvent)
-    }
+      element.textContent = value;
+      // Trigger the input event to notify other listeners of content changes
+      const inputEvent = new InputEvent('input', { bubbles: true });
+      element.dispatchEvent(inputEvent);
+    };
 
-    // 创建适配器以统一处理不同类型的输入元素
+    //Create an adapter to uniformly handle different types of input elements
     const createEditableAdapter = (element: HTMLElement | HTMLInputElement | HTMLTextAreaElement): EditableElement => {
-      // 处理标准输入元素
+      // Process standard input elements
       if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
-        return element
-      } 
-      // 处理 contenteditable 元素
+        return element;
+      }
+      // handle contenteditable elements
       else if (element.getAttribute('contenteditable') === 'true') {
         const adapter = {
-          _element: element, // 保存原始元素引用
+          _element: element, //Save the original element reference
           get value(): string {
-            return getContentEditableValue(element)
+            return getContentEditableValue(element);
           },
           set value(newValue: string) {
-            setContentEditableValue(element, newValue)
+            setContentEditableValue(element, newValue);
           },
-          // contenteditable 元素没有原生的 selectionStart 属性，
-          // 但可以通过 selection API 获取当前光标位置
+          // The contenteditable element does not have a native selectionStart attribute.
+          // But the current cursor position can be obtained through the selection API
           get selectionStart(): number {
-            const selection = window.getSelection()
+            const selection = window.getSelection();
             if (selection && selection.rangeCount > 0) {
-              const range = selection.getRangeAt(0)
+              const range = selection.getRangeAt(0);
               if (element.contains(range.startContainer)) {
-                return range.startOffset
+                return range.startOffset;
               }
             }
-            return 0
+            return 0;
           },
           focus(): void {
-            element.focus()
+            element.focus();
           },
           setSelectionRange(start: number, end: number): void {
             try {
-              const selection = window.getSelection()
+              const selection = window.getSelection();
               if (selection) {
-                selection.removeAllRanges()
-                const range = document.createRange()
-                // 尝试在文本节点中设置范围
-                let textNode = element.firstChild
+                selection.removeAllRanges();
+                const range = document.createRange();
+                // Try setting the range in the text node
+                let textNode = element.firstChild;
                 if (!textNode) {
-                  textNode = document.createTextNode('')
-                  element.appendChild(textNode)
+                  textNode = document.createTextNode('');
+                  element.appendChild(textNode);
                 }
-                range.setStart(textNode, Math.min(start, textNode.textContent?.length || 0))
-                range.setEnd(textNode, Math.min(end, textNode.textContent?.length || 0))
-                selection.addRange(range)
+                range.setStart(textNode, Math.min(start, textNode.textContent?.length || 0));
+                range.setEnd(textNode, Math.min(end, textNode.textContent?.length || 0));
+                selection.addRange(range);
               }
             } catch (error) {
-              console.error('设置 contenteditable 光标位置失败:', error)
+              console.error('Setting contenteditable cursor position failed:', error);
             }
           },
           dispatchEvent(event: Event): boolean {
-            return element.dispatchEvent(event)
-          }
-        }
-        return adapter as EditableElement
+            return element.dispatchEvent(event);
+          },
+        };
+        return adapter as EditableElement;
       }
-      return null as unknown as EditableElement
-    }
+      return null as unknown as EditableElement;
+    };
 
-    // 通用函数：获取当前聚焦的输入框元素（如果有）
+    // General function: Get the currently focused input box element (if any)
     const getFocusedTextInput = (): EditableElement | null => {
-      const activeElement = document.activeElement
-      
-      if (
-        activeElement instanceof HTMLInputElement ||
-        activeElement instanceof HTMLTextAreaElement
-      ) {
-        return activeElement
-      } 
-      // 支持 contenteditable 元素
-      else if (
-        activeElement instanceof HTMLElement &&
-        activeElement.getAttribute('contenteditable') === 'true'
-      ) {
-        return createEditableAdapter(activeElement)
-      }
-      return null
-    }
+      const activeElement = document.activeElement;
 
-    // 通用函数：打开选项页并传递选中的文本
+      if (activeElement instanceof HTMLInputElement || activeElement instanceof HTMLTextAreaElement) {
+        return activeElement;
+      }
+      //Support contenteditable elements
+      else if (activeElement instanceof HTMLElement && activeElement.getAttribute('contenteditable') === 'true') {
+        return createEditableAdapter(activeElement);
+      }
+      return null;
+    };
+
+    // General function: open the options page and pass the selected text
     const openOptionsWithText = async (text: string) => {
       try {
-        // 不直接使用tabs API，而是发送消息给背景脚本
+        // Do not use the tabs API directly, but send messages to the background script
         const response = await browser.runtime.sendMessage({
           action: 'openOptionsPageWithText',
-          text: text
-        })
-        
-        console.log('内容脚本: 已请求背景脚本打开选项页', response)
-        return response && response.success
-      } catch (error) {
-        console.error('内容脚本: 请求打开选项页失败:', error)
-        return false
-      }
-    }
+          text: text,
+        });
 
-    // 通用函数：打开提示词选择器
+        console.log('Content script: Requested background script to open options page', response);
+        return response && response.success;
+      } catch (error) {
+        console.error('Content Script: Request to open options page failed:', error);
+        return false;
+      }
+    };
+
+    // Used to record the last content of editable elements
+    const contentEditableValuesMap = new WeakMap<HTMLElement, string>();
+
     const openPromptSelector = async (inputElement?: EditableElement) => {
-      if (isPromptSelectorOpen) return
+      if (isPromptSelectorOpen) return;
 
       try {
-        isPromptSelectorOpen = true
-        console.log('准备打开提示词选择器...')
+        isPromptSelectorOpen = true;
+        console.log('Get ready to open the prompt word selector...');
 
-        // 保存当前活动元素
-        const activeElement = document.activeElement as HTMLElement
+        //Save the currently active element
+        const activeElement = document.activeElement as HTMLElement;
 
-        // 如果没有提供输入框，尝试获取当前聚焦的输入框
-        const targetInput = inputElement || getFocusedTextInput()
+        // If no input box is provided, try to get the currently focused input box
+        const targetInput = inputElement || getFocusedTextInput();
 
-        // 如果找不到任何输入框，给出提示并返回
+        // If no input box is found, give a prompt and return
         if (!targetInput) {
-          alert(t('clickInputBoxFirst'))
-          isPromptSelectorOpen = false
-          return
+          alert(t('clickInputBoxFirst'));
+          isPromptSelectorOpen = false;
+          return;
         }
 
-        // 先执行数据迁移，确保分类信息正确
-        await migratePromptsWithCategory()
+        // Perform data migration first to ensure that the classification information is correct
+        await migratePromptsWithCategory();
 
-        // 从存储中获取所有提示词
-        const allPrompts = (await storage.getItem<PromptItem[]>(`local:${BROWSER_STORAGE_KEY}`)) || []
-        
-        // 过滤只保留启用的提示词
-        const prompts : PromptItemWithVariables[] = allPrompts.filter(prompt => prompt.enabled !== false)
+        // Get all prompt words from storage
+        const allPrompts = (await storage.getItem<PromptItem[]>(`local:${BROWSER_STORAGE_KEY}`)) || [];
 
-        // 预处理提示词中的变量
-        prompts.forEach(prompt => {
-          // 从内容中提取变量
-          prompt._variables = extractVariables(prompt.content)
-        })
+        // Filter to only keep enabled prompt words
+        const prompts: PromptItemWithVariables[] = allPrompts.filter((prompt) => prompt.enabled !== false);
+
+        // Preprocess variables in prompt words
+        prompts.forEach((prompt) => {
+          //Extract variables from content
+          prompt._variables = extractVariables(prompt.content);
+        });
 
         if (prompts && prompts.length > 0) {
-          console.log(`共找到 ${prompts.length} 个启用的提示词，显示选择器...`)
+          console.log(`Found in total ${prompts.length} enabled prompt words, show selector...`);
 
-          // 显示提示词选择器弹窗
-          const container = showPromptSelector(prompts, targetInput, () => {
-            // 在选择器关闭时恢复焦点
-            if (activeElement && typeof activeElement.focus === 'function') {
-              setTimeout(() => {
-                console.log(t('restoreFocus'))
-                activeElement.focus()
-              }, 100)
-            }
-            isPromptSelectorOpen = false
-          })
+          // Display prompt word selector pop-up window
+          const container = await createAndMountUI(ctx, {
+            anchor: 'body',
+            children: (
+              <PromptSelector
+                prompts={prompts}
+                targetElement={targetInput}
+                onClose={() => {
+                  //Restore focus when selector closes
+                  if (activeElement && typeof activeElement.focus === 'function') {
+                    setTimeout(() => {
+                      console.log(t('restoreFocus'));
+                      activeElement.focus();
+                    }, 100);
+                  }
+                  isPromptSelectorOpen = false;
+                }}
+              />
+            ),
+          });
 
-          // 设置主题
+          // Set theme
           if (container) {
-            setThemeAttributes(container)
+            //   setThemeAttributes(container as any);
           }
-
         } else {
-          console.log(t('noEnabledPromptsFound'))
-          alert(t('noEnabledPromptsAlert'))
-          isPromptSelectorOpen = false
+          console.log(t('noEnabledPromptsFound'));
+          alert(t('noEnabledPromptsAlert'));
+          isPromptSelectorOpen = false;
         }
       } catch (error) {
-        console.error(t('errorGettingPrompts'), error)
-        isPromptSelectorOpen = false
+        console.error(t('errorGettingPrompts'), error);
+        isPromptSelectorOpen = false;
       }
-    }
+    };
 
-    // 用于记录可编辑元素的最后一次内容
-    const contentEditableValuesMap = new WeakMap<HTMLElement, string>()
-
-    // 监听输入框输入事件
+    //Listen to input box input events
     document.addEventListener('input', async (event) => {
-      // 检查事件目标是否为标准输入元素（输入框或文本域）
+      // Check whether the event target is a standard input element (input box or text field)
       if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
-        const inputElement = event.target as HTMLInputElement | HTMLTextAreaElement
-        const value = inputElement.value
+        const inputElement = event.target as HTMLInputElement | HTMLTextAreaElement;
+        const value = inputElement.value;
 
-        // 检查是否输入了"/p"并且弹窗尚未打开
+        // Check if "/p" has been entered and the pop-up window has not yet opened
         if (value?.toLowerCase()?.endsWith('/p') && lastInputValue !== value && !isPromptSelectorOpen) {
-          lastInputValue = value
+          lastInputValue = value;
 
-          // 使用通用函数打开提示词选择器
-          await openPromptSelector(inputElement)
+          // Use a general function to open the prompt word selector
+          await openPromptSelector(inputElement);
         } else if (!value?.toLowerCase()?.endsWith('/p')) {
-          // 更新上次输入值
-          lastInputValue = value
-        }
-      } 
-      // 支持 contenteditable 元素的输入检测
-      else if (
-        event.target instanceof HTMLElement && 
-        event.target.getAttribute('contenteditable') === 'true'
-      ) {
-        const editableElement = event.target as HTMLElement
-        const adapter = createEditableAdapter(editableElement)
-        const value = adapter.value
-
-        // 获取上一次的值，如果没有则为空字符串
-        const lastValue = contentEditableValuesMap.get(editableElement) || ''
-        
-        // 检查是否输入了"/p"并且弹窗尚未打开
-        if (value?.toLowerCase()?.endsWith('/p') && lastValue !== value && !isPromptSelectorOpen) {
-          contentEditableValuesMap.set(editableElement, value)
-          
-          // 使用通用函数打开提示词选择器
-          await openPromptSelector(adapter)
-        } else if (!value?.toLowerCase()?.endsWith('/p')) {
-          // 更新上次输入值
-          contentEditableValuesMap.set(editableElement, value)
+          //Update the last input value
+          lastInputValue = value;
         }
       }
-    })
+      //Support input detection of contenteditable elements
+      else if (event.target instanceof HTMLElement && event.target.getAttribute('contenteditable') === 'true') {
+        const editableElement = event.target as HTMLElement;
+        const adapter = createEditableAdapter(editableElement);
+        const value = adapter.value;
 
-    // 监听来自背景脚本的消息
+        // Get the last value, if not, it is an empty string
+        const lastValue = contentEditableValuesMap.get(editableElement) || '';
+
+        // Check if "/p" has been entered and the pop-up window has not yet opened
+        if (value?.toLowerCase()?.endsWith('/p') && lastValue !== value && !isPromptSelectorOpen) {
+          contentEditableValuesMap.set(editableElement, value);
+
+          // Use a general function to open the prompt word selector
+          await openPromptSelector(adapter);
+        } else if (!value?.toLowerCase()?.endsWith('/p')) {
+          //Update the last input value
+          contentEditableValuesMap.set(editableElement, value);
+        }
+      }
+    });
+
     browser.runtime.onMessage.addListener(async (message) => {
-      console.log('内容脚本: 收到消息', message)
+      console.log('Content script: Message received', message);
 
       if (message.action === 'openPromptSelector') {
-        // 使用通用函数打开提示词选择器
-        await openPromptSelector()
-        return { success: true }
+        // Use a general function to open the prompt word selector
+        await openPromptSelector();
+        return { success: true };
       }
 
       if (message.action === 'getSelectedText') {
         try {
-          // 获取当前选中的文本
-          const selectedText = window.getSelection()?.toString() || ''
-          console.log('内容脚本: 获取到选中文本:', selectedText)
-          
+          // Get the currently selected text
+          const selectedText = window.getSelection()?.toString() || '';
+          console.log('Content script: Get selected text:', selectedText);
+
           if (selectedText) {
-            // 如果有选中文本，通过背景脚本打开选项页
-            const opened = await openOptionsWithText(selectedText)
-            return { success: true, text: selectedText, openedOptionsPage: opened }
+            // If there is selected text, open the options page through the background script
+            const opened = await openOptionsWithText(selectedText);
+            return { success: true, text: selectedText, openedOptionsPage: opened };
           } else {
-            console.log('内容脚本: 未选中任何文本')
-            return { success: true, text: '' }
+            console.log('Content script: No text selected');
+            return { success: true, text: '' };
           }
         } catch (error) {
-          console.error(t('errorGettingSelectedText'), error)
-          return { success: false, error: t('getSelectedTextFailed') }
+          console.error(t('errorGettingSelectedText'), error);
+          return { success: false, error: t('getSelectedTextFailed') };
         }
       }
 
-      return false
-    })
+      return false;
+    });
   },
-})
+});
