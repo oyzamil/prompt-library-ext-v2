@@ -1,17 +1,34 @@
-import { createAndMountUI, ThemeProvider } from '@/providers/ThemeProvider';
-import { t } from '@/utils/i18n';
-import { PromptSelector } from './components/PromptSelector';
+import { showPromptSelector } from './components/PromptSelector';
 import { extractVariables } from './utils/variableParser';
-import { BROWSER_STORAGE_KEY } from '@/utils/constants';
 
 export default defineContentScript({
   matches: ['*://*/*'],
-  // 2. Set cssInjectionMode
-  cssInjectionMode: 'ui',
+  allFrames: true,
+  matchAboutBlank: true,
+  runAt: 'document_end',
 
   async main(ctx) {
+    console.log(t('contentScriptLoaded'));
+
+    //Record the status of the last input
     let lastInputValue = '';
     let isPromptSelectorOpen = false;
+
+    //Set the theme properties of the container
+    const setThemeAttributes = (container: HTMLElement) => {
+      // Set data properties to indicate the current topic
+      container.setAttribute('data-theme', isDarkMode() ? 'dark' : 'light');
+
+      // Monitor theme changes
+      const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleThemeChange = (e: MediaQueryListEvent) => {
+        container.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+      };
+
+      if (darkModeMediaQuery.addEventListener) {
+        darkModeMediaQuery.addEventListener('change', handleThemeChange);
+      }
+    };
 
     // Get the content of the contenteditable element
     const getContentEditableValue = (element: HTMLElement): string => {
@@ -112,14 +129,12 @@ export default defineContentScript({
         console.log('Content script: Requested background script to open options page', response);
         return response && response.success;
       } catch (error) {
-        console.error('Content Script: Request to open options page failed:', error);
+        console.error('Content script: Request to open options page failed:', error);
         return false;
       }
     };
 
-    // Used to record the last content of editable elements
-    const contentEditableValuesMap = new WeakMap<HTMLElement, string>();
-
+    // General function: open the prompt word selector
     const openPromptSelector = async (inputElement?: EditableElement) => {
       if (isPromptSelectorOpen) return;
 
@@ -156,33 +171,24 @@ export default defineContentScript({
         });
 
         if (prompts && prompts.length > 0) {
-          console.log(`Found in total ${prompts.length} enabled prompt words, show selector...`);
+          console.log(`Found in total ${prompts.length} Enabled prompt words, display selector...`);
 
           // Display prompt word selector pop-up window
-          const container = await createAndMountUI(ctx, {
-            anchor: 'body',
-            children: (
-              <PromptSelector
-                prompts={prompts}
-                targetElement={targetInput}
-                onClose={() => {
-                  //Restore focus when selector closes
-                  if (activeElement && typeof activeElement.focus === 'function') {
-                    setTimeout(() => {
-                      console.log(t('restoreFocus'));
-                      activeElement.focus();
-                    }, 100);
-                  }
-                  isPromptSelectorOpen = false;
-                }}
-              />
-            ),
+          const container = showPromptSelector(ctx, prompts, targetInput, () => {
+            //Restore focus when selector closes
+            if (activeElement && typeof activeElement.focus === 'function') {
+              setTimeout(() => {
+                console.log(t('restoreFocus'));
+                activeElement.focus();
+              }, 100);
+            }
+            isPromptSelectorOpen = false;
           });
 
-          // Set theme
-          if (container) {
-            //   setThemeAttributes(container as any);
-          }
+          //Set theme
+          // if (container) {
+          //   setThemeAttributes(container);
+          // }
         } else {
           console.log(t('noEnabledPromptsFound'));
           alert(t('noEnabledPromptsAlert'));
@@ -193,6 +199,9 @@ export default defineContentScript({
         isPromptSelectorOpen = false;
       }
     };
+
+    // Used to record the last content of editable elements
+    const contentEditableValuesMap = new WeakMap<HTMLElement, string>();
 
     //Listen to input box input events
     document.addEventListener('input', async (event) => {
@@ -234,6 +243,7 @@ export default defineContentScript({
       }
     });
 
+    // Listen for messages from the background script
     browser.runtime.onMessage.addListener(async (message) => {
       console.log('Content script: Message received', message);
 

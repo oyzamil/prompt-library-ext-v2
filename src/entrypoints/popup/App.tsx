@@ -1,8 +1,5 @@
-import { BROWSER_STORAGE_KEY } from '@/utils/constants';
-import { useState, useEffect } from 'react';
 import Logo from '~/assets/icon.png';
-import '~/assets/tailwind.css';
-import { t } from '@/utils/i18n';
+import '@/assets/tailwind.css';
 
 function App() {
   const [promptCount, setPromptCount] = useState<number>(0);

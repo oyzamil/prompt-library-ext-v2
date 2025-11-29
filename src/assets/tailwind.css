@@ -38,6 +38,12 @@
   .ant-form-item-inline .ant-form-item-label {
     @apply flex-1;
   }
+  .prompt-item {
+    @apply flex flex-col p-4 space-y-2 border-solid border-b border-gray-200 transition-all;
+  }
+  .prompt-item.selected-item {
+    @apply bg-app-500/10 border-l-4 border-l-app-500;
+  }
 }
 
 @layer utilities {

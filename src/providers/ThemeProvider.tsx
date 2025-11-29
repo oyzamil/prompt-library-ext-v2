@@ -1,14 +1,16 @@
-import '@/assets/tailwind.css';
 import { StyleProvider } from '@ant-design/cssinjs';
+
 import '@ant-design/v5-patch-for-react-19';
 import '@fontsource/poppins';
+
+import tailwindCSS from '@/assets/tailwind.css?inline';
 
 import { theme as AntdTheme, App, ConfigProvider } from 'antd';
 import type { MessageInstance } from 'antd/es/message/interface';
 import type { ModalStaticFunctions } from 'antd/es/modal/confirm';
 import type { NotificationInstance } from 'antd/es/notification/interface';
 import type { GlobalToken } from 'antd/es/theme/interface';
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 const { APP } = useAppConfig();
@@ -28,6 +30,7 @@ interface AntdContextProps {
   message: MessageInstance;
   modal: Omit<ModalStaticFunctions, 'warn'>;
   theme?: ThemeType;
+  // setTheme: (dark: boolean) => void;
   token: GlobalToken;
 }
 
@@ -40,9 +43,8 @@ AntdContext = (globalThis as any).__antd_context__;
 
 const StaticComponents = ({ children, shadowContainer, popupContainer, theme, cssContainer }: ThemeProviderProps) => {
   const { token } = AntdTheme.useToken();
-  const currentAlgorithm = theme === 'dark' ? AntdTheme.darkAlgorithm : AntdTheme.defaultAlgorithm;
 
-  const effectivePopupContainer = popupContainer || (shadowContainer instanceof ShadowRoot ? (shadowContainer.host as HTMLElement) : shadowContainer) || document.body;
+  const currentAlgorithm = theme === 'dark' ? AntdTheme.darkAlgorithm : AntdTheme.defaultAlgorithm;
 
   return (
     <StyleProvider container={cssContainer || shadowContainer || document.body} layer hashPriority="high">
@@ -54,8 +56,7 @@ const StaticComponents = ({ children, shadowContainer, popupContainer, theme, cs
             fontFamily: [APP.FONT_FAMILY, token.fontFamily].toString(),
           },
         }}
-        getPopupContainer={() => effectivePopupContainer}
-        getTargetContainer={() => effectivePopupContainer}
+        getPopupContainer={() => popupContainer || document.body}
       >
         {children}
       </ConfigProvider>
@@ -63,12 +64,25 @@ const StaticComponents = ({ children, shadowContainer, popupContainer, theme, cs
   );
 };
 
+// Dynamic components (depend on App context)
 const DynamicComponents = ({ children, theme }: { children: ReactNode; theme: ThemeType }) => {
   const staticContext = App.useApp();
   const { message, notification, modal } = staticContext;
   const { token } = AntdTheme.useToken();
 
-  return <AntdContext.Provider value={{ message, notification, modal, theme, token }}>{children}</AntdContext.Provider>;
+  return (
+    <AntdContext.Provider
+      value={{
+        message,
+        notification,
+        modal,
+        theme,
+        token,
+      }}
+    >
+      {children}
+    </AntdContext.Provider>
+  );
 };
 
 export const ThemeProvider = ({ children, shadowContainer, popupContainer, cssContainer }: ThemeProviderProps) => {
@@ -118,35 +132,31 @@ export const useAntd = (): AntdContextProps => {
   return context;
 };
 
-const applyStyles = (style: ApplyStyles, anchor: string, shadowHost: HTMLElement, uiContainer: HTMLElement): void => {
-  try {
-    if (style?.root) {
-      injectStyleToMainDom(style.root);
-    }
+const applyStyles = async (style: ApplyStyles, anchor: string, shadowHost: HTMLElement, uiContainer: HTMLElement): Promise<void> => {
+  if (style?.root) {
+    injectStyleToMainDom(style.root);
+  }
 
-    if (style?.anchor) {
-      const anchorEl = document.querySelector(anchor) as HTMLElement | null;
-      if (anchorEl) {
-        Object.assign(anchorEl.style, style.anchor);
-      }
+  if (style?.anchor) {
+    const anchorEl = document.querySelector(anchor) as HTMLElement | null;
+    if (anchorEl) {
+      Object.assign(anchorEl.style, style.anchor);
     }
+  }
 
-    if (style?.anchorParent) {
-      const anchorParent = document.querySelector(anchor)?.parentElement as HTMLElement | null;
-      if (anchorParent) {
-        Object.assign(anchorParent.style, style.anchorParent);
-      }
+  if (style?.anchorParent) {
+    const anchorParent = document.querySelector(anchor)?.parentElement as HTMLElement | null;
+    if (anchorParent) {
+      Object.assign(anchorParent.style, style.anchorParent);
     }
+  }
 
-    if (style?.shadowHost) {
-      Object.assign(shadowHost.style, style.shadowHost);
-    }
+  if (style?.shadowHost) {
+    Object.assign(shadowHost.style, style.shadowHost);
+  }
 
-    if (style?.uiContainer) {
-      Object.assign(uiContainer.style, style.uiContainer);
-    }
-  } catch (error) {
-    console.error('Failed to apply styles:', error);
+  if (style?.uiContainer) {
+    Object.assign(uiContainer.style, style.uiContainer);
   }
 };
 
@@ -162,11 +172,11 @@ export const createAndMountUI = async (ctx: any, props: CreateAndMountUI) => {
         const cssContainer = shadow.querySelector('head')!;
         shadowHost.id = id;
 
-        if (style) {
-          requestAnimationFrame(() => {
-            applyStyles(style, anchor, shadowHost, uiContainer);
-          });
-        }
+        const tailwindStyle = document.createElement('style');
+        tailwindStyle.textContent = tailwindCSS;
+        cssContainer.appendChild(tailwindStyle);
+
+        if (style) applyStyles(style, anchor, shadowHost, shadowHost);
 
         const root = createRoot(uiContainer);
         root.render(
@@ -176,6 +186,7 @@ export const createAndMountUI = async (ctx: any, props: CreateAndMountUI) => {
         );
         return { root, uiContainer };
       },
+      // Ensure removal is only triggered when needed
       onRemove: (elements) => {
         if (elements?.root && elements?.uiContainer) {
           elements?.root.unmount();
@@ -185,7 +196,7 @@ export const createAndMountUI = async (ctx: any, props: CreateAndMountUI) => {
     });
 
     if (!document.getElementById(id)) {
-      ui.mount();
+      ui.autoMount();
     }
     return ui;
   } catch (error) {
