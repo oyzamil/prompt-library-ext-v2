@@ -1,44 +1,44 @@
-import { t } from "@/utils/i18n"
+import { t } from '@/utils/i18n';
 
-// 检测快捷键配置状态
+//Detect shortcut key configuration status
 export const checkShortcutConfiguration = async (): Promise<void> => {
   try {
-    console.log('背景脚本: 开始检测快捷键配置状态');
+    console.log('Background script: Start detecting shortcut key configuration status');
 
-    // 获取所有已配置的命令
+    // Get all configured commands
     const commands = await browser.commands.getAll();
-    const promptCommand = commands.find(cmd => cmd.name === 'open-prompt-selector');
-    const saveCommand = commands.find(cmd => cmd.name === 'save-selected-prompt');
+    const promptCommand = commands.find((cmd) => cmd.name === 'open-prompt-selector');
+    const saveCommand = commands.find((cmd) => cmd.name === 'save-selected-prompt');
 
-    // 检查主要的提示词选择器快捷键
+    // Check the main prompt word selector shortcut keys
     let shortcutIssues: string[] = [];
 
     if (!promptCommand || !promptCommand.shortcut) {
-      shortcutIssues.push('提示词选择器快捷键未配置成功（可能存在冲突）');
-      console.log('背景脚本: 提示词选择器快捷键配置失败');
+      shortcutIssues.push('The prompt word selector shortcut key was not configured successfully (there may be a conflict)');
+      console.log('Background script: Prompt word selector shortcut key configuration failed');
     } else {
-      console.log('背景脚本: 提示词选择器快捷键配置成功:', promptCommand.shortcut);
+      console.log('Background script: Prompt word selector shortcut keys configured successfully:', promptCommand.shortcut);
     }
 
     if (!saveCommand || !saveCommand.shortcut) {
-      shortcutIssues.push('保存提示词快捷键未配置成功（可能存在冲突）');
-      console.log('背景脚本: 保存提示词快捷键配置失败');
+      shortcutIssues.push('The save prompt word shortcut key was not configured successfully (there may be a conflict)');
+      console.log('Background script: Failed to save prompt word shortcut key configuration');
     } else {
-      console.log('背景脚本: 保存提示词快捷键配置成功:', saveCommand.shortcut);
+      console.log('Background script: Save prompt word shortcut key configuration successfully:', saveCommand.shortcut);
     }
 
-    // 存储快捷键配置状态，供弹出窗口和选项页面使用
+    //Storage shortcut key configuration status for use by pop-up windows and options pages
     await browser.storage.local.set({
-      'shortcut_check_result': {
+      shortcut_check_result: {
         hasIssues: shortcutIssues.length > 0,
         issues: shortcutIssues,
         promptShortcut: promptCommand?.shortcut || null,
         saveShortcut: saveCommand?.shortcut || null,
-        checkedAt: Date.now()
-      }
+        checkedAt: Date.now(),
+      },
     });
   } catch (error) {
-    console.error('背景脚本: 检测快捷键配置时出错:', error);
+    console.error('Background script: Error while detecting shortcut key configuration:', error);
   }
 };
 
@@ -68,7 +68,7 @@ export const handleCommand = async (command: string): Promise<void> => {
           const urlWithParams = `${optionsUrl}?action=new&content=${encodeURIComponent(response.text)}`;
           await browser.tabs.create({ url: urlWithParams });
         } else {
-          console.log(t('shortcutSaveNoTextResponse'))
+          console.log(t('shortcutSaveNoTextResponse'));
         }
       } else {
         console.error(t('backgroundNoActiveTab'));

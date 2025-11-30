@@ -1,11 +1,6 @@
-import React, { useState, useEffect } from 'react';
 import { DndContext, DragEndEvent, DragStartEvent, DragOverlay, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, rectSortingStrategy } from '@dnd-kit/sortable';
-import type { PromptItem, Category } from '@/utils/types';
-import { getCategories } from '@/utils/categoryUtils';
-import { t } from '../../../utils/i18n';
 import SortablePromptCard from './SortablePromptCard';
-import EmptyMessage from './EmptyMessage';
 
 interface PromptListProps {
   prompts: PromptItem[];

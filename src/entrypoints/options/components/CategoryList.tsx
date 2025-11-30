@@ -1,8 +1,5 @@
-import { DEFAULT_CATEGORY_ID } from '@/utils/constants';
-import { t } from '../../../utils/i18n';
 import { Button, Card, Popconfirm, Switch } from 'antd';
 import { DeleteFilled, FormOutlined } from '@ant-design/icons';
-import appConfig from '@/app.config';
 
 interface CategoryListProps {
   categories: Category[];
@@ -115,7 +112,7 @@ const CategoryList = ({ categories, onEdit, onDelete, searchTerm, allCategoriesC
                   <>
                     {category && (
                       <div className="flex items-center">
-                        <div className="size-4 rounded-full mr-1.5" style={{ backgroundColor: category.color || appConfig.APP.COLOR_PRIMARY }} />
+                        <div className="size-4 rounded-full mr-1.5" style={{ backgroundColor: category.color || useAppConfig().APP.COLOR_PRIMARY }} />
                         {category.id === DEFAULT_CATEGORY_ID && (
                           <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300">
                             {t('default')}

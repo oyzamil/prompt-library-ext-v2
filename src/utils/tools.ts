@@ -1,12 +1,9 @@
-// 检测系统是否为暗黑模式的函数
+// Function to detect whether the system is in dark mode
 export const isDarkMode = () => {
-  return (
-    window.matchMedia &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches
-  );
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
 };
 
-// 检测操作系统类型
+//Detect operating system type
 export const getOS = () => {
   const platform = navigator.platform.toLowerCase();
   const userAgent = navigator.userAgent.toLowerCase();
@@ -22,7 +19,7 @@ export const getOS = () => {
   }
 };
 
-// 获取复制快捷键文本
+// Get the copy shortcut key text
 export const getCopyShortcutText = () => {
   const os = getOS();
   switch (os) {

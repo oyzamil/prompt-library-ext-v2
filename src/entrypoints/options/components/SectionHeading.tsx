@@ -1,6 +1,4 @@
 import { ReactNode } from 'react';
-import clsx from 'clsx';
-import { twMerge } from 'tailwind-merge';
 import { Input, Select, Button, Badge, Alert } from 'antd';
 import type { AlertProps as AntdAlertProps } from 'antd';
 
@@ -56,17 +54,17 @@ type SectionHeadingProps = {
 };
 
 export default function SectionHeading({ title, description, icon, stats = [], className, colors, searchBar, select, actionButtons = [], alert }: SectionHeadingProps) {
-  const gradient = colors?.length ? twMerge(clsx('bg-linear-to-br', colors)) : 'bg-linear-to-br from-blue-500 to-indigo-600';
+  const gradient = colors?.length ? cn('bg-linear-to-br', colors) : 'bg-linear-to-br from-blue-500 to-indigo-600';
 
   return (
-    <div className={twMerge(clsx('mb-4', className))}>
+    <div className={cn('mb-4', className)}>
       {/* Heading + Icon */}
       <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
         <div className="space-y-2">
           <div className="flex items-center space-x-3">
-            {icon && <div className={twMerge(clsx('w-10 h-10 rounded-xl flex items-center justify-center shadow-lg', gradient))}>{icon}</div>}
+            {icon && <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center shadow-lg', gradient)}>{icon}</div>}
 
-            <h1 className={twMerge(clsx('text-2xl font-bold bg-clip-text text-transparent', gradient.replace('to-br', 'to-r')))}>{title}</h1>
+            <h1 className={cn('text-2xl font-bold bg-clip-text text-transparent', gradient.replace('to-br', 'to-r'))}>{title}</h1>
           </div>
 
           {description && <p className="text-gray-600 dark:text-gray-300 max-w-2xl">{description}</p>}
@@ -76,7 +74,7 @@ export default function SectionHeading({ title, description, icon, stats = [], c
               {stats
                 .filter((s) => s.show !== false)
                 .map((s, i) => (
-                  <Badge key={i} count={s.count} color={clsx(s.color ?? colors?.[0] ?? '#f5222d')}>
+                  <Badge key={i} count={s.count} color={cn(s.color ?? colors?.[0] ?? '#f5222d')}>
                     <span className="text-sm font-medium bg-white py-2 px-3 shadow rounded-md">{s.label}</span>
                   </Badge>
                 ))}
@@ -122,7 +120,7 @@ export default function SectionHeading({ title, description, icon, stats = [], c
           )}
         </div>
       )}
-      {/* Error COntainer  */}
+      {/* Error Container  */}
       {alert?.description && (
         <div className="mt-4">
           <Alert type={alert.type} message={alert.message} description={alert.description} closable={alert.closable ?? true} showIcon={alert.showIcon ?? true} />

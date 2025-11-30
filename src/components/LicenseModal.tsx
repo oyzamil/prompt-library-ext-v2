@@ -1,6 +1,6 @@
 import { useSettings } from '@/hooks/useSettings';
 import { useAntd } from '@/providers/ThemeProvider';
-import { Button, Form, Input, Modal } from 'antd';
+import { Button, Form, Input } from 'antd';
 import axios from 'axios';
 
 const GUMROAD_API = 'https://api.gumroad.com/v2/licenses/verify';
@@ -89,14 +89,15 @@ export const LicenseModal: React.FC = () => {
   return (
     <Modal
       title="Activate Subscription"
-      open={settings?.licenseModalVisible}
+      isOpen={settings?.licenseModalVisible}
       footer={null}
       centered
-      onCancel={() => {
+      onClose={() => {
         saveSettings({ licenseModalVisible: false });
       }}
+      className="min-w-auto"
     >
-      <p className="-mt-4 text-[13px]">
+      <p className="text-[13px]">
         Don't have a subscription?{' '}
         <Button
           className="px-0 underline text-app-500"
@@ -132,7 +133,6 @@ export const LicenseModal: React.FC = () => {
           Verify Subscription
         </Button>
       </Form>
-      <div className="flex rounded-lg bg-blue-500 p-2 text-white"></div>
     </Modal>
   );
 };

@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { getGlobalSettings, updateGlobalSettings, type GlobalSettings } from '@/utils/globalSettings';
-import { t } from '@/utils/i18n';
-import SectionHeading from './SectionHeading';
 import { Alert, Button, Card, Switch } from 'antd';
 import { MessageOutlined, QuestionOutlined, SettingOutlined } from '@ant-design/icons';
+import SectionHeading from './SectionHeading';
 
 const GlobalSettingsPage: React.FC = () => {
   const [settings, setSettings] = useState<GlobalSettings>({

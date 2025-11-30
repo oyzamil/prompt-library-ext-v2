@@ -85,7 +85,7 @@ export const VariableInputModal: React.FC<VariableInputModalProps> = ({ prompt, 
   return (
     <Modal isOpen={true} title={t('fillVariableValues')} onClose={handleCancel} onOk={handleSubmit} okText={t('confirm')} cancelText={t('cancel')} maskClosable={true}>
       <Alert description={t('pleaseEnterVariableValues')} className="p-2" type="warning" />
-      <Form className="mt-3">
+      <Form className="mt-3" layout="vertical">
         {variables.map((variable: string, index: number) => (
           <Form.Item key={variable} label={variable} className="mb-3">
             <Input.TextArea

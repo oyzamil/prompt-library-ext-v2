@@ -1,5 +1,4 @@
 import NotionIntegration from './NotionIntegration';
-import { t } from '@/utils/i18n';
 import SectionHeading from './SectionHeading';
 
 const NotionIntegrationPage: React.FC = () => {

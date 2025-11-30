@@ -1,40 +1,40 @@
-import { t } from "@/utils/i18n"
+import { t } from '@/utils/i18n';
 
 // Setup notification click handlers
 export const setupNotificationHandlers = (): void => {
-  // 处理通知点击事件
+  // Handle notification click event
   if (browser.notifications && browser.notifications.onClicked) {
     browser.notifications.onClicked.addListener(async (notificationId) => {
       if (notificationId === 'shortcut-config-issue') {
-        console.log('背景脚本: 用户点击了快捷键配置通知');
+        console.log('Background script: The user clicked the shortcut key to configure the notification');
 
         try {
-          // 检测浏览器类型并打开对应的快捷键设置页面
+          // Detect the browser type and open the corresponding shortcut key setting page
           const isFirefox = navigator.userAgent.includes('Firefox');
           const shortcutSettingsUrl = isFirefox ? 'about:addons' : 'chrome://extensions/shortcuts';
 
           await browser.tabs.create({ url: shortcutSettingsUrl });
 
-          // 清除通知
+          // clear notification
           await browser.notifications.clear(notificationId);
 
-          // 如果是Firefox，显示额外提示
+          // If it is Firefox, display additional prompts
           if (isFirefox) {
             setTimeout(async () => {
               await browser.notifications.create('firefox-shortcut-tip', {
                 type: 'basic',
                 iconUrl: '/icon/32.png',
-                title: 'Quick Prompt - 设置提示',
-                message: t('shortcutSetupTip')
+                title: 'Prompt Library - Setup prompts',
+                message: t('shortcutSetupTip'),
               });
             }, 1000);
           }
         } catch (error) {
-          console.error('背景脚本: 打开快捷键设置页面失败:', error);
+          console.error('Background script: Failed to open shortcut key setting page:', error);
         }
       }
 
-      // 清除Firefox的提示通知
+      // Clear Firefox notifications
       if (notificationId === 'firefox-shortcut-tip') {
         setTimeout(async () => {
           await browser.notifications.clear(notificationId);

@@ -1,8 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import NotionLogo from './NotionLogo';
-import { t } from '@/utils/i18n';
-import { ApartmentOutlined, CloseOutlined, MenuOutlined, SettingOutlined, TagOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
+import { ApartmentOutlined, CloseOutlined, MenuOutlined, SettingOutlined, TagOutlined } from '@ant-design/icons';
 
 interface SidebarProps {
   className?: string;

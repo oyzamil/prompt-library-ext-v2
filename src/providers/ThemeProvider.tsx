@@ -55,6 +55,13 @@ const StaticComponents = ({ children, shadowContainer, popupContainer, theme, cs
             colorPrimary: APP.COLOR_PRIMARY,
             fontFamily: [APP.FONT_FAMILY, token.fontFamily].toString(),
           },
+          components: {
+            Alert: {
+              defaultPadding: '12px',
+              withDescriptionPadding: '12px',
+              withDescriptionIconSize: 18,
+            },
+          },
         }}
         getPopupContainer={() => popupContainer || document.body}
       >

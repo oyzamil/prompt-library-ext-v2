@@ -1,8 +1,6 @@
-import { browser } from '#imports';
-
 export interface GlobalSettings {
   closeModalOnOutsideClick: boolean;
-  // 可以添加更多全局设置
+  // More global settings can be added
 }
 
 export const DEFAULT_GLOBAL_SETTINGS: GlobalSettings = {
@@ -11,7 +9,7 @@ export const DEFAULT_GLOBAL_SETTINGS: GlobalSettings = {
 
 const GLOBAL_SETTINGS_KEY = 'globalSettings';
 
-// 获取全局设置
+// Get global settings
 export const getGlobalSettings = async (): Promise<GlobalSettings> => {
   try {
     const result = await browser.storage.sync.get(GLOBAL_SETTINGS_KEY);
@@ -25,7 +23,7 @@ export const getGlobalSettings = async (): Promise<GlobalSettings> => {
   }
 };
 
-// 保存全局设置
+//Save global settings
 export const saveGlobalSettings = async (settings: GlobalSettings): Promise<void> => {
   try {
     await browser.storage.sync.set({
@@ -37,7 +35,7 @@ export const saveGlobalSettings = async (settings: GlobalSettings): Promise<void
   }
 };
 
-// 更新部分全局设置
+//Update some global settings
 export const updateGlobalSettings = async (partialSettings: Partial<GlobalSettings>): Promise<void> => {
   try {
     const currentSettings = await getGlobalSettings();
@@ -49,10 +47,8 @@ export const updateGlobalSettings = async (partialSettings: Partial<GlobalSettin
   }
 };
 
-// 获取特定设置
-export const getGlobalSetting = async <K extends keyof GlobalSettings>(
-  key: K
-): Promise<GlobalSettings[K]> => {
+// Get specific settings
+export const getGlobalSetting = async <K extends keyof GlobalSettings>(key: K): Promise<GlobalSettings[K]> => {
   const settings = await getGlobalSettings();
   return settings[key];
-}; 
+};

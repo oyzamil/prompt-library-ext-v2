@@ -1,10 +1,7 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
-import type { PromptItem, Category } from '@/utils/types';
-import { t } from '@/utils/i18n';
 import { Alert, Button, Card, Popconfirm, Switch, Tag } from 'antd';
 import { CheckOutlined, ClockCircleOutlined, CopyOutlined, DeleteFilled, DragOutlined, FormOutlined, NotificationOutlined, PushpinFilled } from '@ant-design/icons';
-import appConfig from '@/app.config';
 
 interface SortablePromptCardProps {
   prompt: PromptItem;
@@ -125,7 +122,7 @@ const SortablePromptCard: React.FC<SortablePromptCardProps> = ({ prompt, categor
                 {/* Classification identification */}
                 {category && (
                   <div className="flex items-center">
-                    <div className="w-3 h-3 rounded-full mr-1.5" style={{ backgroundColor: category.color || appConfig.APP.COLOR_PRIMARY }} />
+                    <div className="w-3 h-3 rounded-full mr-1.5" style={{ backgroundColor: category.color || useAppConfig().APP.COLOR_PRIMARY }} />
                     <span className="text-xs text-gray-600 dark:text-gray-300 font-medium">{category.name}</span>
                   </div>
                 )}
@@ -167,16 +164,7 @@ const SortablePromptCard: React.FC<SortablePromptCardProps> = ({ prompt, categor
                 {prompt.content}
               </p>
 
-              {prompt.notes && prompt.notes.trim() && (
-                <Alert
-                  message={<p className="text-xs font-bold text-amber-500">{t('notes')}</p>}
-                  description={<p className="text-xs -mt-2">{prompt.notes}</p>}
-                  type="warning"
-                  icon={<NotificationOutlined className="text-lg" />}
-                  showIcon
-                  className="p-3 mb-2"
-                />
-              )}
+              {prompt.notes && prompt.notes.trim() && <Alert message={t('notes')} description={prompt.notes} type="warning" icon={<NotificationOutlined />} showIcon />}
 
               <div className="flex items-center justify-between text-xs mt-4">
                 <div className="flex items-center space-x-2">

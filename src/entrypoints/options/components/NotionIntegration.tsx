@@ -1,5 +1,3 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { t } from '@/utils/i18n';
 import { Alert, Button, Card, Divider, Input, Switch, Tag } from 'antd';
 import { CheckOutlined, DeleteOutlined, InfoCircleFilled, PlusOutlined, SyncOutlined } from '@ant-design/icons';
 
@@ -406,7 +404,6 @@ const NotionIntegration: React.FC<NotionIntegrationProps> = () => {
             <Input type="password" id="apiKey" value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder={t('notionAPIKeyPlaceholder')} required />
 
             <Alert
-              className="p-3"
               type="warning"
               description={
                 <>
@@ -423,7 +420,7 @@ const NotionIntegration: React.FC<NotionIntegrationProps> = () => {
           <div className="space-y-1">
             <label htmlFor="databaseId">{t('notionDatabaseID')}</label>
             <Input id="databaseId" value={databaseId} onChange={(e) => setDatabaseId(e.target.value)} placeholder={t('notionDatabaseIDPlaceholder')} required />
-            <Alert className="p-3" description={t('notionDatabaseIDHelp')} />
+            <Alert description={t('notionDatabaseIDHelp')} />
           </div>
 
           <Button type="primary" htmlType="submit" icon={<CheckOutlined />} block>
@@ -449,7 +446,6 @@ const NotionIntegration: React.FC<NotionIntegrationProps> = () => {
               <li>{t('permissionsNote')}</li>
             </ul>
           }
-          className="p-3"
           type="warning"
         />
       </Card>

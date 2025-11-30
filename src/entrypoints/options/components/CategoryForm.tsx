@@ -1,5 +1,4 @@
-import { t } from '@/utils/i18n';
-import { Alert, Button, Input, Switch } from 'antd';
+import { Alert, Button, Form, Input, Switch } from 'antd';
 import { InfoCircleOutlined } from '@ant-design/icons';
 
 interface CategoryFormProps {
@@ -86,23 +85,18 @@ const CategoryForm = ({ onSubmit, initialData, onCancel, isEditing }: CategoryFo
 
   return (
     <div>
-      {error && <Alert description={<p className="text-red-700">{error}</p>} icon={<InfoCircleOutlined className="text-lg text-red-700" />} className="p-3" type="error" showIcon />}
+      {error && <Alert description={error} icon={<InfoCircleOutlined />} type="error" showIcon />}
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div>
-          <label htmlFor="name">{t('categoryName')}</label>
+      <Form onFinish={handleSubmit} className="space-y-3" layout="vertical">
+        <Form.Item label={t('categoryName')} required>
           <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t('categoryExample')} />
-        </div>
+        </Form.Item>
 
-        <div>
-          <label htmlFor="description">
-            {t('description')} <span className="text-gray-400 dark:text-gray-500 font-normal">({t('optional')})</span>
-          </label>
+        <Form.Item label={t('description')}>
           <Input.TextArea id="description" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} placeholder={t('descriptionExample')} />
-        </div>
+        </Form.Item>
 
-        <div>
-          <label>{t('categoryColor')}</label>
+        <Form.Item label={t('categoryColor')}>
           <div className="flex flex-wrap gap-2">
             {colorOptions.map((option) => (
               <div
@@ -128,15 +122,15 @@ const CategoryForm = ({ onSubmit, initialData, onCancel, isEditing }: CategoryFo
               </div>
             ))}
           </div>
-        </div>
+        </Form.Item>
 
-        <div className="mt-4">
+        <Form.Item className="mt-4 flex">
           <label className="relative flex items-center cursor-pointer">
             <Switch checked={enabled} onChange={(checked) => setEnabled(checked)} />
             <span className="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">{enabled ? t('enabled') : t('disabled')}</span>
           </label>
           <span className="text-gray-400 dark:text-gray-500 font-normal">({t('disabledTips')})</span>
-        </div>
+        </Form.Item>
 
         <div className="flex justify-end gap-3">
           <Button type="primary" htmlType="submit" disabled={isSubmitting}>
@@ -147,7 +141,7 @@ const CategoryForm = ({ onSubmit, initialData, onCancel, isEditing }: CategoryFo
             {t('cancel')}
           </Button>
         </div>
-      </form>
+      </Form>
     </div>
   );
 };

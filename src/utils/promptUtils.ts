@@ -4,10 +4,10 @@ function hashString(str: string): number {
 
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // 转换为32位整数
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; //Convert to 32-bit integer
   }
-  return Math.abs(hash); // 确保是正数
+  return Math.abs(hash); // Make sure it is a positive number
 }
 
 /**
@@ -26,6 +26,6 @@ export function generatePromptId(title: string, content: string, tags?: string[]
   }
   const hash = hashString(uniqueString);
   const hashStr = hash.toString(36);
-  // 添加前缀p以确保ID始终以字母开头，避免潜在的CSS选择器问题或HTML ID问题
+  // Add prefix p to ensure IDs always start with a letter, avoiding potential CSS selector issues or HTML ID issues
   return `p${hashStr}`;
-} 
+}

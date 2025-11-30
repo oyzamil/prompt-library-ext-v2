@@ -1,10 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import type { PromptItem, Category } from '@/utils/types';
-import { getCategories } from '@/utils/categoryUtils';
-import { DEFAULT_CATEGORY_ID } from '@/utils/constants';
-import { t } from '@/utils/i18n';
-import { Alert, Button, Input, Select, Switch } from 'antd';
+import { Alert, Button, Form, Input, Select, Switch } from 'antd';
 import { InfoCircleOutlined } from '@ant-design/icons';
 
 interface PromptFormProps {
@@ -64,9 +60,7 @@ const PromptForm = ({ onSubmit, initialData, onCancel, isEditing }: PromptFormPr
     setError(null);
   }, [initialData]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleSubmit = async (e: FormEvent) => {
     // Validate form inputs
     if (!title.trim()) {
       setError(t('titleCannotBeEmpty'));
@@ -125,23 +119,22 @@ const PromptForm = ({ onSubmit, initialData, onCancel, isEditing }: PromptFormPr
 
   return (
     <div>
-      {error && <Alert description={<p className="text-red-700">{error}</p>} icon={<InfoCircleOutlined className="text-lg text-red-700" />} className="p-3" type="error" showIcon />}
+      {error && <Alert description={error} icon={<InfoCircleOutlined />} type="error" showIcon />}
 
-      <form onSubmit={handleSubmit} className="space-y-3 mt-1">
-        <div>
-          <label htmlFor="title">{t('titleLabel')}</label>
+      <Form onFinish={handleSubmit} className="space-y-2 mt-1" layout="vertical">
+        {/* TITLE */}
+        <Form.Item label={t('titleLabel')} required>
           <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t('titlePlaceholder')} />
-        </div>
+        </Form.Item>
 
-        <div>
-          <label htmlFor="content">{t('contentLabel')}</label>
+        {/* CONTENT */}
+        <Form.Item label={t('contentLabel')} required>
           <Input.TextArea id="content" value={content} onChange={(e) => setContent(e.target.value)} rows={6} placeholder={t('contentPlaceholder')} />
-        </div>
+          <Alert message={t('variableFormatTip')} description={t('variableExample')} className="mt-2" type="warning" />
+        </Form.Item>
 
-        <Alert message={t('variableFormatTip')} description={t('variableExample')} className="p-3" type="warning" />
-
-        <div>
-          <label htmlFor="category">{t('categoryLabel')}</label>
+        {/* CATEGORY */}
+        <Form.Item label={t('categoryLabel')} required>
           {loadingCategories ? (
             <>
               <Input value={t('loadingCategories')} disabled />
@@ -163,39 +156,50 @@ const PromptForm = ({ onSubmit, initialData, onCancel, isEditing }: PromptFormPr
               </Link>
             </p>
           )}
-        </div>
+        </Form.Item>
 
-        <div>
-          <label htmlFor="tags">
-            {t('tagsLabel')} <span className="text-gray-400 font-normal">({t('tagsOptional')})</span>
-          </label>
+        {/* TAGS */}
+        <Form.Item
+          label={
+            <>
+              {t('tagsLabel')} <span className="text-gray-400 font-normal">({t('tagsOptional')})</span>
+            </>
+          }
+        >
           <Input id="tags" value={tags} onChange={(e) => setTags(e.target.value)} placeholder={t('tagsPlaceholder')} />
-        </div>
+        </Form.Item>
 
-        <div>
-          <label htmlFor="notes">
-            {t('notesLabel')} <span className="text-gray-400 font-normal">({t('notesOptional')})</span>
-          </label>
+        {/* NOTES */}
+        <Form.Item
+          label={
+            <>
+              {t('notesLabel')} <span className="text-gray-400 font-normal">({t('notesOptional')})</span>
+            </>
+          }
+        >
           <Input.TextArea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} placeholder={t('notesPlaceholder')} />
-          <Alert className="mt-1 text-xs p-3" description={t('notesHelp')} type="warning" />
-        </div>
+          <Alert className="mt-2 text-xs p-3" description={t('notesHelp')} type="warning" />
+        </Form.Item>
 
-        <div className="flex items-center mt-4">
+        {/* ENABLED SWITCH */}
+        <Form.Item>
           <Switch checked={enabled} onChange={(checked) => setEnabled(checked)} />{' '}
           <span className="ml-2 text-xs font-medium text-gray-700">
             {enabled ? t('enabledStatus') : t('disabledStatus')} <span className="text-gray-400 font-normal ml-2">({t('disabledStatusTip')})</span>
           </span>
-        </div>
-
-        <div className="flex justify-end space-x-3 pt-2 border-t border-gray-200">
-          <Button type="primary" htmlType="submit" loading={isSubmitting}>
-            {isSubmitting ? t('savingPrompt') : isEditing ? t('updatePrompt') : t('savePromptButton')}
-          </Button>
-          <Button onClick={onCancel} danger>
-            {t('cancel')}
-          </Button>
-        </div>
-      </form>
+        </Form.Item>
+        {/* ACTION BUTTONS */}
+        <Form.Item className="mb-0">
+          <div className="flex justify-end gap-2">
+            <Button type="primary" htmlType="submit" loading={isSubmitting}>
+              {isSubmitting ? t('savingPrompt') : isEditing ? t('updatePrompt') : t('savePromptButton')}
+            </Button>
+            <Button onClick={onCancel} danger>
+              {t('cancel')}
+            </Button>
+          </div>
+        </Form.Item>
+      </Form>
     </div>
   );
 };

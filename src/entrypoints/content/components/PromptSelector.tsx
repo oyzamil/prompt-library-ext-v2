@@ -400,7 +400,6 @@ const PromptSelector: React.FC<PromptSelectorProps> = ({ ctx, prompts, targetEle
       isOpen
       onClose={onClose}
       maskClosable={closeOnOutsideClick}
-      className={cn('min-w-[700px] w-[80%]')}
       styles={{
         content: {
           padding: 0,

@@ -21,41 +21,40 @@ export interface AuthResult {
 
 // Helper to determine if we are in a Chrome-like environment that supports getAuthToken
 export const isLikelyChromeDesktop = (): boolean => {
-  const ua = navigator.userAgent.toLowerCase()
-  return ua.includes('chrome/') && !ua.includes('edg/') && !ua.includes('opr/') && !navigator.userAgentData?.mobile
-}
+  const ua = navigator.userAgent.toLowerCase();
+  return ua.includes('chrome/') && !ua.includes('edg/') && !ua.includes('opr/') && !navigator.userAgentData?.mobile;
+};
 
 export const getDesktopTypeForAuth = async (): Promise<string> => {
   if (typeof navigator.userAgentData !== 'undefined' && navigator.userAgentData) {
     try {
-      const highEntropyValues = await navigator.userAgentData.getHighEntropyValues(['platformArch', 'bitness', 'model'])
-      const platform = (navigator.userAgentData.platform || '').toLowerCase()
-      const brands = navigator.userAgentData.brands?.map((b: { brand: string; version: string }) => b.brand.toLowerCase()).join(',')
+      const highEntropyValues = await navigator.userAgentData.getHighEntropyValues(['platformArch', 'bitness', 'model']);
+      const platform = (navigator.userAgentData.platform || '').toLowerCase();
+      const brands = navigator.userAgentData.brands?.map((b: { brand: string; version: string }) => b.brand.toLowerCase()).join(',');
 
       console.log('[UAData Check]', {
         platform: platform,
         mobile: navigator.userAgentData.mobile,
         brands: brands,
-        highEntropyValues: highEntropyValues
-      })
+        highEntropyValues: highEntropyValues,
+      });
 
       // Arc Browser on Windows reports as "Windows", "x86", "64" and brands include "Chromium", "Google Chrome"
       // but might not have "Arc" explicitly. It behaves like Chrome for getAuthToken.
       if (platform === 'windows' && brands?.includes('chromium') && brands?.includes('google chrome')) {
         // Further check if it's Arc or similar that might hide its true identity but supports getAuthToken
-        if (isLikelyChromeDesktop()) return 'CHROME_DESKTOP_LIKELY' // Treat as Chrome if it walks and talks like Chrome
+        if (isLikelyChromeDesktop()) return 'CHROME_DESKTOP_LIKELY'; // Treat as Chrome if it walks and talks like Chrome
       }
       // Standard Chrome check
-      if (navigator.userAgentData.brands?.some(b => b.brand.toLowerCase() === 'google chrome') && !navigator.userAgentData.mobile) return 'CHROME_DESKTOP_NATIVE'
-
+      if (navigator.userAgentData.brands?.some((b) => b.brand.toLowerCase() === 'google chrome') && !navigator.userAgentData.mobile) return 'CHROME_DESKTOP_NATIVE';
     } catch (e) {
-      console.warn('Error fetching highEntropyValues from UserAgentData:', e)
+      console.warn('Error fetching highEntropyValues from UserAgentData:', e);
     }
   }
   // Fallback or non-Chromium
-  if (isLikelyChromeDesktop()) return 'CHROME_DESKTOP_UA_FALLBACK'
-  return 'OTHER'
-}
+  if (isLikelyChromeDesktop()) return 'CHROME_DESKTOP_UA_FALLBACK';
+  return 'OTHER';
+};
 
 // Core function for Google Authentication via getAuthToken (Chrome specific)
 export const getAuthTokenInternal = (interactive: boolean): Promise<string | null> => {
@@ -90,7 +89,7 @@ export const getAuthTokenInternal = (interactive: boolean): Promise<string | nul
         }
 
         if (tokenToResolve) {
-          console.log(`getAuthToken(interactive: ${interactive}) successful with token (first few chars): ${tokenToResolve.substring(0,10)}...`);
+          console.log(`getAuthToken(interactive: ${interactive}) successful with token (first few chars): ${tokenToResolve.substring(0, 10)}...`);
           resolve(tokenToResolve);
         } else {
           console.warn(`getAuthToken(interactive: ${interactive}) did not yield a valid token. Result was:`, result);
@@ -129,7 +128,7 @@ export const launchWebAuthFlowInternal = async (interactive: boolean): Promise<s
 
     const responseUrl = await browser.identity.launchWebAuthFlow({
       url: authUrl.toString(),
-      interactive
+      interactive,
     });
 
     if (!responseUrl) {
@@ -199,7 +198,7 @@ export const authenticateWithGoogle = async (interactive: boolean): Promise<Auth
   const webClientIdPrefixAvailable = WEB_APP_CLIENT_ID_PREFIX;
 
   if (!chromeClientIdPrefixAvailable && !webClientIdPrefixAvailable) {
-    console.error("[AUTH_ERROR V2] Neither CHROME_CLIENT_ID_PREFIX nor WEB_APP_CLIENT_ID_PREFIX are defined. Authentication is not possible.");
+    console.error('[AUTH_ERROR V2] Neither CHROME_CLIENT_ID_PREFIX nor WEB_APP_CLIENT_ID_PREFIX are defined. Authentication is not possible.');
     return null;
   }
 
@@ -223,12 +222,12 @@ export const authenticateWithGoogle = async (interactive: boolean): Promise<Auth
     }
     console.warn('[AUTH_FALLBACK V2] getAuthTokenInternal failed or returned no token.');
     if (!webClientIdPrefixAvailable) {
-      console.error("[AUTH_ERROR V2] getAuthToken failed and WEB_APP_CLIENT_ID_PREFIX is not available for fallback. Cannot authenticate.");
+      console.error('[AUTH_ERROR V2] getAuthToken failed and WEB_APP_CLIENT_ID_PREFIX is not available for fallback. Cannot authenticate.');
       return null;
     }
     console.log('[AUTH_FALLBACK V2] Proceeding to launchWebAuthFlowInternal as fallback.');
   } else if (!webClientIdPrefixAvailable) {
-    console.error("[AUTH_ERROR V2] Not a Chrome-like desktop or CHROME_CLIENT_ID_PREFIX not set, and WEB_APP_CLIENT_ID_PREFIX is not available. Cannot authenticate.");
+    console.error('[AUTH_ERROR V2] Not a Chrome-like desktop or CHROME_CLIENT_ID_PREFIX not set, and WEB_APP_CLIENT_ID_PREFIX is not available. Cannot authenticate.');
     return null;
   }
 
@@ -282,17 +281,18 @@ export const logoutGoogle = async (): Promise<void> => {
       if (browser.identity && typeof browser.identity.getAuthToken === 'function') {
         try {
           const tokenResponse = await getAuthTokenInternal(false); // Try to get current token without UI
-          if (tokenResponse) { // tokenResponse is string | null
+          if (tokenResponse) {
+            // tokenResponse is string | null
             activeToken = tokenResponse;
           }
         } catch (e) {
-          console.warn("Error trying to fetch token non-interactively before logout:", e);
+          console.warn('Error trying to fetch token non-interactively before logout:', e);
         }
       }
     }
 
     if (activeToken && browser.identity && typeof browser.identity.removeCachedAuthToken === 'function') {
-      console.log('Removing cached auth token for token:', activeToken.substring(0, 20) + "...");
+      console.log('Removing cached auth token for token:', activeToken.substring(0, 20) + '...');
       await browser.identity.removeCachedAuthToken({ token: activeToken });
     } else if (browser.identity && typeof browser.identity.clearAllCachedAuthTokens === 'function') {
       // Fallback if a specific token couldn't be fetched or removeCachedAuthToken is unavailable
@@ -305,7 +305,6 @@ export const logoutGoogle = async (): Promise<void> => {
     // Always remove user info from our storage
     await browser.storage.local.remove(USER_INFO_STORAGE_KEY);
     console.log('User info removed from local storage. Logout process complete.');
-
   } catch (error) {
     console.error('Error during Google logout:', error);
     // Still attempt to clear local storage as a fallback

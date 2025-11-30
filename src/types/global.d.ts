@@ -49,8 +49,53 @@ interface NavigatorUAData extends UADataValues {
   toJSON(): UADataValues;
 }
 
-declare global {
-  interface Navigator {
-    readonly userAgentData?: NavigatorUAData;
-  }
+interface Navigator {
+  readonly userAgentData?: NavigatorUAData;
+}
+
+/**
+ * Categorical data structure
+ */
+interface Category {
+  id: string;
+  name: string;
+  description?: string;
+  color?: string;
+  enabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Prompt data structure
+ */
+interface PromptItem {
+  id: string;
+  title: string;
+  content: string;
+  tags: string[];
+  enabled: boolean;
+  categoryId: string;
+  pinned?: boolean; //Top field
+  notionPageId?: string;
+  notes?: string; // Remarks field
+  lastModified?: string; // Last modified time (ISO string)
+  sortOrder?: number; // Sorting field, used for drag and drop sorting
+}
+
+interface PromptItemWithVariables extends PromptItem {
+  /**
+   * The parsed variables are not persisted.
+   */
+  _variables?: string[];
+}
+
+// Custom interface for unified processing of different types of text input elements
+interface EditableElement {
+  value: string;
+  selectionStart?: number | null;
+  selectionEnd?: number | null;
+  focus(): void;
+  setSelectionRange?(start: number, end: number): void;
+  dispatchEvent(event: Event): boolean;
 }

@@ -1,16 +1,12 @@
-import { BROWSER_STORAGE_KEY, DEFAULT_PROMPTS } from "@/utils/constants"
-import { initializeDefaultCategories, migratePromptsWithCategory } from "@/utils/categoryUtils"
-import { t } from "@/utils/i18n"
-
 // Import extracted modules
-import { checkShortcutConfiguration, handleCommand } from "@/utils/browser/shortcutManager"
-import { createContextMenus, handleContextMenuClick } from "@/utils/browser/contextMenuManager"
-import { setupNotificationHandlers } from "@/utils/browser/notificationManager"
-import { setupStorageChangeListeners } from "@/utils/browser/storageManager"
-import { handleRuntimeMessage } from "@/utils/browser/messageHandler"
+import { checkShortcutConfiguration, handleCommand } from '@/utils/browser/shortcutManager';
+import { createContextMenus, handleContextMenuClick } from '@/utils/browser/contextMenuManager';
+import { setupNotificationHandlers } from '@/utils/browser/notificationManager';
+import { setupStorageChangeListeners } from '@/utils/browser/storageManager';
+import { handleRuntimeMessage } from '@/utils/browser/messageHandler';
 
 export default defineBackground(() => {
-  console.log('Hello background!', { id: browser.runtime.id })
+  console.log('Hello background!', { id: browser.runtime.id });
 
   // Initialization logic (Modified to include Notion sync setting)
   const initializeDefaultData = async () => {
@@ -22,7 +18,7 @@ export default defineBackground(() => {
       const prompts = promptsResult[BROWSER_STORAGE_KEY as keyof typeof promptsResult];
 
       if (prompts && Array.isArray(prompts) && prompts.length > 0) {
-        console.log('背景脚本: 已存在Prompts数据，无需初始化默认提示词');
+        console.log('Background script: Prompts data already exists, no need to initialize default prompt words');
       } else {
         const dataToStore: Record<string, any> = {};
         dataToStore[BROWSER_STORAGE_KEY] = DEFAULT_PROMPTS;
@@ -30,7 +26,7 @@ export default defineBackground(() => {
         console.log(t('backgroundNotionSyncInitialized'));
       }
     } catch (error) {
-      console.error('背景脚本: 初始化默认数据失败:', error);
+      console.error('Background script: Failed to initialize default data:', error);
     }
   };
 
@@ -49,12 +45,12 @@ export default defineBackground(() => {
   // Extension lifecycle events
   browser.runtime.onInstalled.addListener(async (details) => {
     if (details.reason === 'install') {
-      console.log('背景脚本: 扩展首次安装');
+      console.log('Background script: Extension first installation');
       await initializeDefaultData();
       await browser.storage.sync.set({ notionSyncToNotionEnabled: false });
       console.log(t('backgroundNotionSyncInitialized'));
 
-      // 安装后延迟一下再检测快捷键，确保扩展完全加载
+      // After installation, delay for a while before checking the shortcut keys to ensure that the extension is fully loaded.
       setTimeout(async () => {
         await checkShortcutConfiguration();
       }, 2000);
@@ -65,4 +61,4 @@ export default defineBackground(() => {
   browser.runtime.onMessage.addListener(handleRuntimeMessage);
 
   console.log('Background script fully initialized with modular components.');
-})
+});

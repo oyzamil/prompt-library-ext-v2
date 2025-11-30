@@ -1,6 +1,3 @@
-import React, { useState, useEffect } from 'react';
-import { t } from '@/utils/i18n';
-
 interface UserInfo {
   email: string;
   name: string;

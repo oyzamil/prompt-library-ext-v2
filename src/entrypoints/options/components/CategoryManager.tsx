@@ -1,14 +1,8 @@
+import { CloseOutlined, DownloadOutlined, InfoCircleOutlined, LinkOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
+import { Alert, Button, Input } from 'antd';
 import CategoryForm from './CategoryForm';
 import CategoryList from './CategoryList';
-import Modal from '../../../components/Modal';
-import ConfirmModal from './ConfirmModal';
-import { getCategories, addCategory, updateCategory, deleteCategory, getPromptCountByCategory } from '@/utils/categoryUtils';
-import { DEFAULT_CATEGORY_ID } from '@/utils/constants';
-import { t } from '@/utils/i18n';
 import SectionHeading from './SectionHeading';
-import { CloseOutlined, DownloadOutlined, InfoCircleOutlined, LinkOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
-import appConfig from '@/app.config';
-import { Alert, Button, Input } from 'antd';
 import EmptyMessage from './EmptyMessage';
 
 const CategoryManager = () => {
@@ -525,7 +519,7 @@ const CategoryManager = () => {
             {
               label: t('totalCategories'),
               count: categories.length.toString(),
-              color: appConfig.APP.COLOR_PRIMARY,
+              color: useAppConfig().APP.COLOR_PRIMARY,
             },
             {
               label: t('enabledCount'),
@@ -600,27 +594,23 @@ const CategoryManager = () => {
         )}
 
         {/* Add/edit category modal */}
-        <Modal
-          isOpen={isModalOpen}
-          onClose={closeModal}
-          title={editingCategory ? t('editCategory') : t('addCategory')} // Title as string
-        >
+        <Modal isOpen={isModalOpen} onClose={closeModal} title={editingCategory ? t('editCategory') : t('addCategory')} footer={null}>
           <CategoryForm onSubmit={handleCategorySubmit} initialData={editingCategory} onCancel={cancelEdit} isEditing={!!editingCategory} />
         </Modal>
 
         {/* Remote import modal box */}
-        <Modal isOpen={isRemoteImportModalOpen} onClose={closeRemoteImportModal} title={t('importCategoriesFromUrl')}>
-          <div className="space-y-4">
-            <Alert message={t('importInstructions')} description={t('importCategoriesInstructionsDetail')} icon={<InfoCircleOutlined className="text-lg" />} className="p-3" type="warning" showIcon />
+        <Modal isOpen={isRemoteImportModalOpen} onClose={closeRemoteImportModal} title={t('importCategoriesFromUrl')} footer={null}>
+          <div className="space-y-3">
+            <Alert message={t('importInstructions')} description={t('importCategoriesInstructionsDetail')} icon={<InfoCircleOutlined />} type="warning" showIcon />
 
             <div>
               <label htmlFor="remote-url">{t('remoteUrl')}</label>
               <Input id="remote-url" value={remoteUrl} onChange={handleRemoteUrlChange} placeholder="https://example.com/prompts.json" prefix={<LinkOutlined />} />
             </div>
 
-            {error && <Alert message={t('importFailed')} description={error} icon={<InfoCircleOutlined className="text-lg" />} className="p-3" type="error" showIcon />}
+            {error && <Alert message={t('importFailed')} description={error} icon={<InfoCircleOutlined />} type="error" showIcon />}
 
-            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex justify-end gap-2">
               <Button type="primary" onClick={importFromRemoteUrl} disabled={isRemoteImporting || !remoteUrl.trim()} loading={isRemoteImporting}>
                 {isRemoteImporting ? t('importing') : t('startImport')}
               </Button>

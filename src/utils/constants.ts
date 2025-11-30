@@ -1,5 +1,3 @@
-import { PromptItem, Category } from './types';
-
 export const BROWSER_STORAGE_KEY = 'userPrompts';
 export const CATEGORIES_STORAGE_KEY = 'userCategories';
 

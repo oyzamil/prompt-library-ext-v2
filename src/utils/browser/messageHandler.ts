@@ -1,8 +1,7 @@
-import { BROWSER_STORAGE_KEY } from "@/utils/constants"
-import { authenticateWithGoogle, logoutGoogle, USER_INFO_STORAGE_KEY } from "@/utils/auth/googleAuth"
-import { syncFromNotionToLocal, syncLocalDataToNotion } from "@/utils/sync/notionSync"
-import type { PromptItem } from "@/utils/types"
-import { t } from "@/utils/i18n"
+import { BROWSER_STORAGE_KEY } from '@/utils/constants';
+import { authenticateWithGoogle, logoutGoogle, USER_INFO_STORAGE_KEY } from '@/utils/auth/googleAuth';
+import { syncFromNotionToLocal, syncLocalDataToNotion } from '@/utils/sync/notionSync';
+import { t } from '@/utils/i18n';
 
 // Main message handler
 export const handleRuntimeMessage = async (message: any, sender: Browser.runtime.MessageSender, sendResponse: (response?: any) => void) => {
@@ -47,61 +46,62 @@ export const handleRuntimeMessage = async (message: any, sender: Browser.runtime
   }
 
   // +++ Consolidated Google Auth Message Handlers +++
-  if (message.action === 'authenticateWithGoogle' || message.action === 'googleLogin') { // Handles both old and new action name for login
+  if (message.action === 'authenticateWithGoogle' || message.action === 'googleLogin') {
+    // Handles both old and new action name for login
     console.log(`[MSG_AUTH V3] Processing '${message.action}' for interactive: ${message.interactive}`);
 
-    // 定义认证状态键，用于存储认证进度
+    //Define authentication status key, used to store authentication progress
     const AUTH_STATUS_KEY = 'google_auth_status';
 
-    // 更新认证状态
+    //Update authentication status
     const updateAuthStatus = async (status: string) => {
       await browser.storage.local.set({
         [AUTH_STATUS_KEY]: {
           status: status,
-          timestamp: Date.now()
-        }
+          timestamp: Date.now(),
+        },
       });
     };
 
-    // 标记认证开始
+    // Mark the start of authentication
     await updateAuthStatus('in_progress');
 
-    // 为了解决异步操作和UI更新之间的时序问题
-    // 定义响应类型
+    //In order to solve the timing problem between asynchronous operations and UI updates
+    //Define response type
     interface AuthResponse {
       success: boolean;
       data?: {
         token: string;
-        userInfo: { email: string; name: string, id: string };
+        userInfo: { email: string; name: string; id: string };
       };
       error?: string;
     }
 
     let authPromise = new Promise<AuthResponse>(async (resolve) => {
       try {
-        // 改进认证逻辑，先尝试使用交互式登录，如果失败则检查已存在的会话
+        //Improve the authentication logic, try to use interactive login first, and if it fails, check the existing session
         let authResult = null;
         const isInteractive = message.interactive === true;
 
         console.log('[MSG_AUTH V3] Starting authentication process...');
 
-        // 首先尝试进行认证
+        // First try to authenticate
         authResult = await authenticateWithGoogle(isInteractive);
 
-        // 确保我们有足够的时间等待认证完成
+        // Make sure we have enough time to wait for authentication to complete
         console.log('[MSG_AUTH V3] Initial auth attempt completed, checking result...');
 
-        // 如果交互式登录失败但Chrome中已登录账号，尝试获取已有会话信息
+        // If the interactive login fails but the account is already logged in in Chrome, try to obtain the existing session information
         if (!authResult && isInteractive) {
           console.log('[MSG_AUTH V3] Interactive auth failed, checking for existing session...');
           await updateAuthStatus('checking_session');
-          // 检查本地存储中是否已有用户信息
+          // Check if user information already exists in local storage
           const storedInfo = await browser.storage.local.get(USER_INFO_STORAGE_KEY);
           if (storedInfo && storedInfo[USER_INFO_STORAGE_KEY]) {
             console.log('[MSG_AUTH V3] Found existing user info in storage');
             authResult = {
-              token: 'session-token', // 使用占位符token
-              userInfo: storedInfo[USER_INFO_STORAGE_KEY]
+              token: 'session-token', //Use placeholder token
+              userInfo: storedInfo[USER_INFO_STORAGE_KEY],
             };
           }
         }
@@ -114,8 +114,8 @@ export const handleRuntimeMessage = async (message: any, sender: Browser.runtime
             success: true,
             data: {
               token: authResult.token,
-              userInfo: authResult.userInfo
-            }
+              userInfo: authResult.userInfo,
+            },
           });
         } else {
           console.warn('[MSG_AUTH V3] Authentication failed or no user info.');
@@ -129,8 +129,8 @@ export const handleRuntimeMessage = async (message: any, sender: Browser.runtime
       }
     });
 
-    // 使用更可靠的异步响应模式
-    authPromise.then(response => {
+    // Use a more reliable asynchronous response mode
+    authPromise.then((response) => {
       console.log('[MSG_AUTH V3] Sending final auth response:', response.success);
       sendResponse(response);
     });
@@ -138,17 +138,18 @@ export const handleRuntimeMessage = async (message: any, sender: Browser.runtime
     return true; // Indicate asynchronous response
   }
 
-  if (message.action === 'logoutGoogle' || message.action === 'googleLogout') { // Handles both old and new action name for logout
+  if (message.action === 'logoutGoogle' || message.action === 'googleLogout') {
+    // Handles both old and new action name for logout
     console.log(`[MSG_LOGOUT V3] Processing '${message.action}'`);
 
-    // 定义响应类型
+    //Define response type
     interface LogoutResponse {
       success: boolean;
       message?: string;
       error?: string;
     }
 
-    // 使用Promise确保异步处理完成后再响应
+    // Use Promise to ensure that asynchronous processing is completed before responding
     const logoutPromise = new Promise<LogoutResponse>(async (resolve) => {
       try {
         await logoutGoogle(); // Core logoutGoogle handles token removal and USER_INFO_STORAGE_KEY
@@ -160,8 +161,8 @@ export const handleRuntimeMessage = async (message: any, sender: Browser.runtime
       }
     });
 
-    // 使用更可靠的异步响应模式
-    logoutPromise.then(response => {
+    // Use a more reliable asynchronous response mode
+    logoutPromise.then((response) => {
       console.log('[MSG_LOGOUT V3] Sending final logout response:', response.success);
       sendResponse(response);
     });
@@ -192,52 +193,52 @@ export const handleRuntimeMessage = async (message: any, sender: Browser.runtime
 
     const syncId = Date.now().toString();
 
-    // 告知前端同步已开始 - 移动到 await 之前
+    // Notify the front end that synchronization has started - move before await
     sendResponse({
       success: true,
       syncInProgress: true,
       syncId: syncId,
-      message: '从Notion同步已开始，正在处理...'
+      message: 'Synchronization from Notion has started and is being processed...',
     });
 
-    // 异步处理同步操作 和 存储初始状态
-    (async function() {
+    //Asynchronously handle synchronous operations and store initial state
+    (async function () {
       try {
-        // 存储同步状态，标记为进行中 - 现在在异步块内
+        // Store sync state, marked as in progress - now inside an async block
         await browser.storage.local.set({
-          'notion_from_sync_status': {
+          notion_from_sync_status: {
             id: syncId,
             status: 'in_progress',
-            startTime: Date.now()
-          }
+            startTime: Date.now(),
+          },
         });
 
         console.log('[SYNC_FROM_NOTION_START] Beginning sync from Notion process');
         const success = await syncFromNotionToLocal(message.forceSync || false, message.mode || 'replace');
         console.log(`[SYNC_FROM_NOTION_COMPLETE] Sync from Notion ${success ? 'successful' : 'failed'}`);
 
-        // 存储同步结果
+        //Storage synchronization results
         await browser.storage.local.set({
-          'notion_from_sync_status': {
+          notion_from_sync_status: {
             id: syncId,
             status: success ? 'success' : 'error',
             success: success,
-            message: success ? '从Notion同步成功!' : '同步失败，请查看控制台日志',
-            completedTime: Date.now()
-          }
+            message: success ? 'Synchronization from Notion successful!' : 'Synchronization failed, please check the console log',
+            completedTime: Date.now(),
+          },
         });
       } catch (error: any) {
         console.error('[SYNC_FROM_NOTION_ERROR] Error syncing from Notion:', error);
 
-        // 存储错误信息
+        // store error information
         await browser.storage.local.set({
-          'notion_from_sync_status': {
+          notion_from_sync_status: {
             id: syncId,
             status: 'error',
             success: false,
-            error: error?.message || '从Notion同步过程中发生未知错误',
-            completedTime: Date.now()
-          }
+            error: error?.message || 'An unknown error occurred during synchronization from Notion',
+            completedTime: Date.now(),
+          },
         });
       }
     })();
@@ -250,79 +251,79 @@ export const handleRuntimeMessage = async (message: any, sender: Browser.runtime
 
     const syncId = Date.now().toString();
 
-    // 告知前端同步已开始 - 移动到 await 之前
+    // Notify the front end that synchronization has started - move before await
     sendResponse({
       success: true,
       syncInProgress: true,
       syncId: syncId,
-      message: '同步已开始，正在处理...'
+      message: 'Synchronization has started and is being processed...',
     });
 
-    // 异步处理同步操作 和 存储初始状态
-    (async function() {
+    //Asynchronously handle synchronous operations and store initial state
+    (async function () {
       try {
-        // 存储同步状态，标记为进行中 - 现在在异步块内
+        // Store sync state, marked as in progress - now inside an async block
         await browser.storage.local.set({
-          'notion_sync_status': {
+          notion_sync_status: {
             id: syncId,
             status: 'in_progress',
-            startTime: Date.now()
-          }
+            startTime: Date.now(),
+          },
         });
         console.log('[SYNC_START] Beginning sync to Notion process');
         const result = await syncLocalDataToNotion(message.forceSync || false);
         console.log(`[SYNC_COMPLETE] Sync to Notion ${result.success ? 'successful' : 'failed'}`, result.errors || '');
 
-        // 存储同步结果
+        //Storage synchronization results
         if (result.success && !result.errors?.length) {
-          // 完全成功
+          // Completely successful
           await browser.storage.local.set({
-            'notion_sync_status': {
+            notion_sync_status: {
               id: syncId,
               status: 'success',
               success: true,
-              message: '同步成功!',
-              completedTime: Date.now()
-            }
+              message: 'Synchronization successful!',
+              completedTime: Date.now(),
+            },
           });
         } else if (result.success && result.errors?.length) {
-          // 部分成功，有一些错误
+          // Partially successful, with some errors
           await browser.storage.local.set({
-            'notion_sync_status': {
+            notion_sync_status: {
               id: syncId,
               status: 'error',
-              success: true, // 仍然标记为有一定程度的成功
-              message: '部分同步成功，但有错误发生',
+              success: true, // Still marked as having a certain level of success
+              message: 'Partial synchronization was successful, but an error occurred',
               error: result.errors.join('\n'),
-              completedTime: Date.now()
-            }
+              completedTime: Date.now(),
+            },
           });
         } else {
-          // 完全失败
+          // Complete failure
           await browser.storage.local.set({
-            'notion_sync_status': {
+            notion_sync_status: {
               id: syncId,
               status: 'error',
               success: false,
-              message: '同步失败',
-              error: result.errors ? result.errors.join('\n') : '未知错误',
-              completedTime: Date.now()
-            }
+              message: 'Sync failed',
+              error: result.errors ? result.errors.join('\n') : 'unknown error',
+              completedTime: Date.now(),
+            },
           });
         }
       } catch (error: any) {
         console.error('[SYNC_ERROR] Error syncing to Notion:', error);
 
-        // 存储错误信息
+        // store error information
         await browser.storage.local.set({
-          'notion_sync_status': {
+          notion_sync_status: {
             id: syncId,
             status: 'error',
             success: false,
-            message: '同步失败',
-            error: error?.message || '同步过程中发生未知错误',
-            completedTime: Date.now()
-          }
+            message: 'Sync failed',
+            error: error?.message || 'An unknown error occurred during synchronization',
+            completedTime: Date.now(),
+          },
         });
       }
     })();

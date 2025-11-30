@@ -7,6 +7,14 @@
 @plugin "./../../plugins/tailwind-scrollbar";
 @custom-variant dark (&:where(.dark, .dark *));
 
+@font-face {
+  font-family: 'DS-Digital';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/DS-DIGI.ttf') format('truetype');
+}
+
 @layer base {
   body {
     @apply relative bg-white font-['Poppins']!;
@@ -38,6 +46,9 @@
   .ant-form-item-inline .ant-form-item-label {
     @apply flex-1;
   }
+  .ant-form-item-row .ant-form-item-label {
+    @apply pb-0.5;
+  }
   .prompt-item {
     @apply flex flex-col p-4 space-y-2 border-solid border-b border-gray-200 transition-all;
   }
@@ -55,5 +66,11 @@
   }
   .glass {
     @apply min-h-[70px] w-full rounded-md bg-linear-to-r from-transparent to-white/30 p-8 mix-blend-hard-light shadow-md backdrop-blur-lg;
+  }
+  .font-digital {
+    font-family: 'DS-Digital', monospace;
+  }
+  kbd {
+    @apply mx-1 my-0.5 inline-flex min-h-5 items-center justify-center rounded border border-gray-300 text-app-500 bg-white px-1.5 py-0.5 text-xs font-semibold shadow-sm dark:border-gray-600 dark:bg-gray-700;
   }
 }

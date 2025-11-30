@@ -1,16 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
+import { Alert, Button, Form, Input } from 'antd';
+import { CloseOutlined, DownloadOutlined, InfoCircleOutlined, LinkOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import PromptForm from './PromptForm';
 import PromptList from './PromptList';
-import Modal from '../../../components/Modal';
-import { PromptItem, Category } from '@/utils/types';
-import { BROWSER_STORAGE_KEY, DEFAULT_CATEGORY_ID } from '@/utils/constants';
-import { getCategories, migratePromptsWithCategory } from '@/utils/categoryUtils';
-import { t } from '@/utils/i18n';
-import { CloseOutlined, DownloadOutlined, InfoCircleOutlined, LinkOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import SectionHeading from './SectionHeading';
-import appConfig from '@/app.config';
 import EmptyMessage from './EmptyMessage';
-import { Alert, Button, Input } from 'antd';
 
 const PromptManager = () => {
   const [prompts, setPrompts] = useState<PromptItem[]>([]);
@@ -535,7 +529,7 @@ const PromptManager = () => {
             {
               label: t('totalCount'),
               count: prompts.length.toString(),
-              color: appConfig.APP.COLOR_PRIMARY,
+              color: useAppConfig().APP.COLOR_PRIMARY,
             },
             {
               label: t('enabledCount'),
@@ -641,7 +635,14 @@ const PromptManager = () => {
         )}
 
         {/* Add/edit Prompt modal box */}
-        <Modal isOpen={isModalOpen} onClose={closeModal} title={editingPrompt ? t('editPrompt') : t('newPrompt')}>
+        <Modal
+          isOpen={isModalOpen}
+          onClose={() => {
+            editingPrompt ? cancelEdit() : closeModal();
+          }}
+          title={editingPrompt ? t('editPrompt') : t('newPrompt')}
+          footer={null}
+        >
           <PromptForm
             onSubmit={handlePromptSubmit}
             initialData={
@@ -660,24 +661,25 @@ const PromptManager = () => {
                     }
                   : null
             }
-            onCancel={cancelEdit}
+            onCancel={() => {
+              editingPrompt ? cancelEdit() : closeModal();
+            }}
             isEditing={!!editingPrompt}
           />
         </Modal>
 
         {/* Remote import modal box */}
-        <Modal isOpen={isRemoteImportModalOpen} onClose={closeRemoteImportModal} title={t('importFromUrl')}>
-          <div className="space-y-4">
-            <Alert message={t('importInstructions')} description={t('importInstructionsDetail')} icon={<InfoCircleOutlined className="text-lg" />} className="p-3" type="warning" showIcon />
+        <Modal isOpen={isRemoteImportModalOpen} onClose={closeRemoteImportModal} title={t('importFromUrl')} footer={null}>
+          <Form className="space-y-3" layout="vertical">
+            <Alert message={t('importInstructions')} description={t('importInstructionsDetail')} icon={<InfoCircleOutlined />} type="warning" showIcon />
 
-            <div>
-              <label htmlFor="remote-url">{t('remoteUrl')}</label>
+            <Form.Item label={t('remoteUrl')}>
               <Input id="remote-url" value={remoteUrl} onChange={handleRemoteUrlChange} placeholder="https://example.com/prompts.json" prefix={<LinkOutlined />} />
-            </div>
+            </Form.Item>
 
-            {error && <Alert message={t('importFailed')} description={error} icon={<InfoCircleOutlined className="text-lg" />} className="p-3" type="error" showIcon />}
+            {error && <Alert message={t('importFailed')} description={error} icon={<InfoCircleOutlined />} type="error" showIcon />}
 
-            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex justify-end gap-3">
               <Button type="primary" onClick={importFromRemoteUrl} disabled={isRemoteImporting || !remoteUrl.trim()} loading={isRemoteImporting}>
                 {isRemoteImporting ? t('importing') : t('startImport')}
               </Button>
@@ -685,7 +687,7 @@ const PromptManager = () => {
                 {t('cancel')}
               </Button>
             </div>
-          </div>
+          </Form>
         </Modal>
       </div>
     </div>
