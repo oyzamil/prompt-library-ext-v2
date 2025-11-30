@@ -14,22 +14,6 @@ export default defineContentScript({
     let lastInputValue = '';
     let isPromptSelectorOpen = false;
 
-    //Set the theme properties of the container
-    const setThemeAttributes = (container: HTMLElement) => {
-      // Set data properties to indicate the current topic
-      container.setAttribute('data-theme', isDarkMode() ? 'dark' : 'light');
-
-      // Monitor theme changes
-      const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      const handleThemeChange = (e: MediaQueryListEvent) => {
-        container.setAttribute('data-theme', e.matches ? 'dark' : 'light');
-      };
-
-      if (darkModeMediaQuery.addEventListener) {
-        darkModeMediaQuery.addEventListener('change', handleThemeChange);
-      }
-    };
-
     // Get the content of the contenteditable element
     const getContentEditableValue = (element: HTMLElement): string => {
       return element.textContent || '';

@@ -7,46 +7,11 @@ import NotionIntegrationPage from './components/NotionIntegrationPage';
 import GoogleAuthPage from './components/GoogleAuthPage';
 import GlobalSettings from './components/GlobalSettings';
 import ToastContainer from './components/ToastContainer';
-import { t } from '@/utils/i18n';
 import { AnimatePresence, motion } from 'framer-motion';
 const App = () => {
   // Add back to top button related state
   const [showBackToTop, setShowBackToTop] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  // Theme switching logic
-  useEffect(() => {
-    document.title = t('promptLibrary');
-
-    // Detect the system color mode and set the corresponding class
-    const updateTheme = (isDark: boolean) => {
-      if (isDark) {
-        document.documentElement.classList.remove('light');
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-        document.documentElement.classList.add('light');
-      }
-    };
-
-    // Initial detection
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      updateTheme(true);
-    }
-
-    // Monitor system color mode changes
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = (event: MediaQueryListEvent) => {
-      updateTheme(event.matches);
-    };
-
-    mediaQuery.addEventListener('change', handleChange);
-
-    // Cleanup function
-    return () => {
-      mediaQuery.removeEventListener('change', handleChange);
-    };
-  }, []);
 
   // Add scroll monitoring and return to top functions
   useEffect(() => {
@@ -114,7 +79,7 @@ const App = () => {
               <div className="fixed bottom-6 right-6 z-9999">
                 <button
                   onClick={scrollToTop}
-                  className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="bg-app-600 hover:bg-app-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-app-500 focus:ring-offset-2"
                   title={t('backToTop')}
                   aria-label={t('backToTop')}
                 >

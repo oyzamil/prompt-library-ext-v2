@@ -1,7 +1,3 @@
-import type { PromptItem } from '@/utils/types';
-import { DEFAULT_CATEGORY_ID, BROWSER_STORAGE_KEY } from '@/utils/constants'; // Import DEFAULT_CATEGORY_ID and BROWSER_STORAGE_KEY
-import { generatePromptId } from '@/utils/promptUtils'; // Import generatePromptId
-
 //Storage the real title attribute name in Notion Database
 let notionDatabaseTitlePropertyName: string = 'Title'; // Default is "Title"
 

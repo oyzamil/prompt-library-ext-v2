@@ -1,9 +1,8 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { CompressOutlined, CopyOutlined } from '@ant-design/icons';
+import { CopyOutlined } from '@ant-design/icons';
 
 import { ThemeProvider } from '@/providers/ThemeProvider.tsx';
-import App from './App.tsx';
 import { Button, Input, Select, Space, Tag } from 'antd';
 
 const ModalComponent = () => {
