@@ -222,8 +222,8 @@ const GoogleAuthPage: React.FC = () => {
         <Card
           title={
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                <SafetyOutlined className="text-green-600" />
+              <div className="w-8 h-8 bg-app-100/10 dark:bg-app-900/30 rounded-lg flex items-center justify-center">
+                <SafetyOutlined className="text-app-600" />
               </div>
               <span>{t('accountAuthentication')}</span>
             </div>
@@ -236,23 +236,16 @@ const GoogleAuthPage: React.FC = () => {
           <div className="flex flex-col justify-center ">
             {user ? (
               <div className="flex flex-col items-center p-6 bg-gray-50/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-xl border border-gray-200/50 dark:border-gray-600/50">
-                <div className="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center mb-3">
-                  <span className="text-blue-600 dark:text-blue-200 text-2xl font-bold">{user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}</span>
+                <div className="w-16 h-16 rounded-full bg-app-100/10 dark:bg-app-800 flex items-center justify-center mb-3">
+                  <span className="text-app-600 dark:text-app-200/10 text-2xl font-bold">{user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}</span>
                 </div>
                 <div className="text-center">
                   <h3 className="font-medium text-gray-800 dark:text-gray-200">{user.name}</h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{user.email}</p>
-                  <Button
-                    type="primary"
-                    onClick={handleLogout}
-                    disabled={isLoading}
-                    icon={
-                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                      </svg>
-                    }
-                    danger
-                  >
+                  <Button type="primary" onClick={handleLogout} disabled={isLoading} danger>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                    </svg>{' '}
                     {t('logoutGoogle')}
                   </Button>
                 </div>

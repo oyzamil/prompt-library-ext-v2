@@ -12,4 +12,5 @@ A starter template to make broweser extension using WXT
 
 ```
 Remove-Item -Recurse -Force .git
+https://console.cloud.google.com/apis/credentials?project=chrome-extension-463213
 ```
