@@ -1,7 +1,6 @@
 import { StyleProvider } from '@ant-design/cssinjs';
 
 import '@ant-design/v5-patch-for-react-19';
-import '@fontsource/poppins';
 
 import tailwindCSS from '@/assets/tailwind.css?inline';
 
@@ -12,8 +11,6 @@ import type { NotificationInstance } from 'antd/es/notification/interface';
 import type { GlobalToken } from 'antd/es/theme/interface';
 import { createContext, useContext, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
-
-const { APP } = useAppConfig();
 
 type ThemeType = 'light' | 'dark' | 'system';
 
@@ -52,8 +49,8 @@ const StaticComponents = ({ children, shadowContainer, popupContainer, theme, cs
         theme={{
           algorithm: currentAlgorithm,
           token: {
-            colorPrimary: APP.COLOR_PRIMARY,
-            fontFamily: [APP.FONT_FAMILY, token.fontFamily].toString(),
+            colorPrimary: useAppConfig().APP.COLOR_PRIMARY,
+            fontFamily: [useAppConfig().APP.FONT_FAMILY, token.fontFamily].toString(),
           },
           components: {
             Alert: {
@@ -111,7 +108,7 @@ export const ThemeProvider = ({ children, shadowContainer, popupContainer, cssCo
   }, [settings]);
 
   const updateBodyClass = (theme: ThemeType) => {
-    const doc = document.documentElement;
+    const doc = document.querySelector(getPackageProp('name')) || document.documentElement;
     doc.classList.toggle('dark', theme === 'dark');
     doc.classList.toggle('light', theme === 'light');
 
@@ -168,8 +165,7 @@ const applyStyles = async (style: ApplyStyles, anchor: string, shadowHost: HTMLE
 };
 
 export const createAndMountUI = async (ctx: any, props: CreateAndMountUI) => {
-  const { anchor, position = 'inline', children, style, id = 'softweb-tuts' } = props;
-
+  const { anchor, position = 'inline', children, style, id = getPackageProp('name') } = props;
   try {
     const ui = await createShadowRootUi(ctx, {
       name: id,
@@ -178,6 +174,38 @@ export const createAndMountUI = async (ctx: any, props: CreateAndMountUI) => {
       onMount: (uiContainer, shadow, shadowHost) => {
         const cssContainer = shadow.querySelector('head')!;
         shadowHost.id = id;
+
+        function buildFontFaces() {
+          return `
+@font-face {
+  font-family: 'Poppins';
+  font-weight: 400;
+  src: url('${browser.runtime.getURL('/fonts/poppins/Poppins-Regular.ttf')}');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-weight: 600;
+  src: url('${browser.runtime.getURL('/fonts/poppins/Poppins-SemiBold.ttf')}');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-weight: 700;
+  src: url('${browser.runtime.getURL('/fonts/poppins/Poppins-Bold.ttf')}');
+}
+
+@font-face {
+  font-family: 'DS-Digital';
+  font-weight: 400;
+  src: url('${browser.runtime.getURL('/fonts/digit/DS-DIGI.TTF')}');
+}
+`;
+        }
+
+        const styleFonts = document.createElement('style');
+        styleFonts.textContent = buildFontFaces();
+        shadowHost.appendChild(styleFonts);
 
         const tailwindStyle = document.createElement('style');
         tailwindStyle.textContent = tailwindCSS;

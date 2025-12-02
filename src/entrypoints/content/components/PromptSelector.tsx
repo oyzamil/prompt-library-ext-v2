@@ -107,11 +107,12 @@ const PromptSelector: React.FC<PromptSelectorProps> = ({ ctx, prompts, targetEle
     try {
       await navigator.clipboard.writeText(prompt.content);
       setCopiedId(prompt.id);
-      message.success('Prompt Copied to clipboard.');
+      message.success('Prompt copied to clipboard.');
       setTimeout(() => {
         setCopiedId(null);
       }, 2000); //Clear the copy status after 2 seconds
     } catch (err) {
+      message.error('Error copying prompt.');
       console.error(t('copyFailed'), err);
     }
   };
@@ -395,6 +396,19 @@ const PromptSelector: React.FC<PromptSelectorProps> = ({ ctx, prompts, targetEle
     }, 1000);
   }, []);
 
+  const handlePromptHover = (e: React.MouseEvent<HTMLElement>) => {
+    const el = e.currentTarget;
+    const rect = el.getBoundingClientRect();
+
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    el.style.setProperty('--mouse-x', `${x}px`);
+    el.style.setProperty('--mouse-y', `${y}px`);
+    el.style.setProperty('--spot-color', useAppConfig().APP.COLOR_PRIMARY);
+    el.style.setProperty('--spot-color-light', `${useAppConfig().APP.COLOR_PRIMARY}1A`);
+  };
+
   return (
     <Modal
       isOpen
@@ -429,7 +443,7 @@ const PromptSelector: React.FC<PromptSelectorProps> = ({ ctx, prompts, targetEle
           </Select>
         </div>
 
-        <div ref={listRef} className="flex flex-col max-h-[350px] overflow-y-scroll">
+        <div ref={listRef} className="flex flex-col max-h-[345px] overflow-y-scroll prompt-items">
           {filteredPrompts.length > 0 ? (
             filteredPrompts.map((prompt, index) => {
               const category = categoriesMap[prompt.categoryId];
@@ -440,21 +454,21 @@ const PromptSelector: React.FC<PromptSelectorProps> = ({ ctx, prompts, targetEle
                   className={`${index === selectedIndex ? 'selected-item' : ' '} prompt-item`}
                   onClick={() => applyPrompt(prompt)}
                   onMouseEnter={() => !isKeyboardNav && setSelectedIndex(index)}
+                  onMouseMove={handlePromptHover}
                 >
-                  <div className="flex auto gap-2.5">
+                  <div className="prompt-content flex auto gap-2.5">
                     <div className="space-y-2 w-full">
                       <div className="title font-bold">{prompt.title}</div>
-
-                      <div className="content line-clamp-1">{prompt.content}</div>
+                      <div className="line-clamp-1">{prompt.content}</div>
                     </div>
 
-                    <Button icon={<CopyOutlined />} title="Copy" className="flex-none" onClick={(e) => copyPrompt(e, prompt)} />
+                    <Button icon={<CopyOutlined />} title="Copy" className="flex-none z-50" onClick={(e) => copyPrompt(e, prompt)} type="primary" />
                   </div>
 
-                  <div className="meta">
+                  <div className="meta z-50">
                     {category && (
-                      <Tag>
-                        <span className="size-2 inline-block rounded-full mr-1" style={{ backgroundColor: category.color || useAppConfig().APP.COLOR_PRIMARY }}></span>
+                      <Tag color={useAppConfig().APP.COLOR_PRIMARY}>
+                        <span className="size-2 inline-block rounded-full mr-1 border border-white" style={{ backgroundColor: category.color || useAppConfig().APP.COLOR_PRIMARY }}></span>
                         <span>{category.name}</span>
                       </Tag>
                     )}

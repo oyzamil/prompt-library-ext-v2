@@ -114,7 +114,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
         {/* bottom area */}
         <div className="p-4 border-t border-gray-200 dark:border-gray-700 w-full">
           <div className="mb-3 space-y-1">
-            <NavLink
+            {/* <NavLink
               to="/integrations/notion"
               onClick={closeSidebar}
               className={({ isActive }) =>
@@ -127,7 +127,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
             >
               <NotionLogo />
               {t('notionSync')}
-            </NavLink>
+            </NavLink> */}
             <NavLink
               to="/integrations/google"
               onClick={closeSidebar}

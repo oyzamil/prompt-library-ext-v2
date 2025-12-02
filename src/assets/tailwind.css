@@ -7,15 +7,36 @@
 @plugin "./../../plugins/tailwind-scrollbar";
 @custom-variant dark (&:where(.dark, .dark *));
 
-@font-face {
-  font-family: 'DS-Digital';
-  font-style: normal;
-  font-weight: 400 700;
-  font-display: swap;
-  src: url('/fonts/DS-DIGI.ttf') format('truetype');
-}
-
 @layer base {
+  @font-face {
+    font-family: 'DS-Digital';
+    font-style: normal;
+    font-weight: 400 700;
+    font-display: swap;
+    src: url('/fonts/digit/DS-DIGI.ttf') format('truetype');
+  }
+
+  @font-face {
+    font-family: 'Poppins';
+    src: url('/fonts/poppins/Poppins-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+  }
+
+  @font-face {
+    font-family: 'Poppins';
+    src: url('/fonts/poppins/Poppins-SemiBold.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+  }
+
+  @font-face {
+    font-family: 'Poppins';
+    src: url('/fonts/poppins/Poppins-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+  }
+
   body {
     @apply relative bg-white font-['Poppins']!;
   }
@@ -50,10 +71,31 @@
     @apply pb-0.5;
   }
   .prompt-item {
-    @apply flex flex-col p-4 space-y-2 border-solid border-b border-gray-200 transition-all;
+    @apply flex flex-col p-4 space-y-2 border-solid border-b border-gray-200 transition-all duration-100 relative;
   }
+  .prompt-item::before,
+  .prompt-item::after {
+    @apply absolute inset-0 opacity-0 transition-opacity duration-500;
+    border-radius: inherit;
+    content: '';
+  }
+
   .prompt-item.selected-item {
-    @apply bg-app-500/10 border-l-4 border-l-app-500;
+    @apply border-l-4 border-l-app-500;
+  }
+
+  .prompt-item:hover::before {
+    opacity: 1;
+  }
+
+  .prompt-item::before {
+    background: radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), var(--spot-color-light), transparent 40%);
+    z-index: 3;
+  }
+
+  .prompt-item::after {
+    background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), var(--spot-color-light), transparent 40%);
+    z-index: 1;
   }
 }
 

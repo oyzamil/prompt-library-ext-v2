@@ -16,6 +16,7 @@ export default defineConfig({
     build: {
       // Disable compression for easier debugging
       minify: configEnv.mode === 'production',
+      sourcemap: false,
     },
   }),
   modules: ['@wxt-dev/module-react', '@wxt-dev/auto-icons'],
@@ -26,8 +27,7 @@ export default defineConfig({
     const finalChromeClientId = import.meta.env.WXT_CHROME_APP_CLIENT_ID_PREFIX || defaultChrome;
     const finalWebClientId = import.meta.env.WXT_WEB_APP_CLIENT_ID_PREFIX || defaultWeb;
 
-    console.log('finalChromeClientId', finalChromeClientId);
-    console.log('finalWebClientId', finalWebClientId);
+    // console.log({finalChromeClientId, finalWebClientId});
 
     return {
       name: appConfig.APP.NAME,
@@ -60,6 +60,12 @@ export default defineConfig({
           description: '__MSG_saveSelectedPrompt__',
         },
       },
+      web_accessible_resources: [
+        {
+          resources: ['fonts/*'],
+          matches: ['<all_urls>'],
+        },
+      ],
     };
   },
 });

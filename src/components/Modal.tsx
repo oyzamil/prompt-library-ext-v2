@@ -10,10 +10,9 @@ interface ModalProps extends Omit<AntdModalProps, 'title' | 'open' | 'onCancel'>
   title?: string;
   titleIcon?: ReactNode;
   children?: ReactNode;
-  contentRef?: RefObject<HTMLDivElement>;
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, noTitle = false, title, titleIcon, children, contentRef, className, ...rest }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, noTitle = false, title, titleIcon, children, className, ...rest }) => {
   const TitleIcon = title === t('newPrompt') ? <PlusOutlined className="text-app-500" /> : <EditOutlined className="text-app-500" />;
 
   return (
@@ -31,7 +30,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, noTitle = false, title, 
       className={cn('min-w-[700px] w-[80%]', className)}
       {...rest}
     >
-      <div ref={contentRef}>{children}</div>
+      {children}
     </AntdModal>
   );
 };
