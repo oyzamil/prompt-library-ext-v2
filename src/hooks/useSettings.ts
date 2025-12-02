@@ -24,7 +24,7 @@ function deepMerge<T extends Record<string, any>>(target: T, source: DeepPartial
 
 interface SettingsState {
   settings: Settings;
-  loading: boolean;
+  loadingSettings: boolean;
 
   loadSettings: () => Promise<void>;
   saveSettings: (newSettings: DeepPartial<Settings>) => Promise<void>;
@@ -38,27 +38,29 @@ export const useSettings = create<SettingsState>()(
     persist(
       (set, get) => ({
         settings: SETTINGS,
-        loading: true,
+        loadingSettings: false,
 
         loadSettings: async () => {
-          set({ loading: true });
+          set({ loadingSettings: true });
           return new Promise<void>((resolve) => {
             browser.storage.local.get(['settings'], (result) => {
               const stored = (result['settings'] as Settings) || {};
               const merged = deepMerge(SETTINGS, stored);
-              set({ settings: merged, loading: false });
+              set({ settings: merged, loadingSettings: false });
               resolve();
             });
           });
         },
 
         saveSettings: async (newSettings) => {
+          set({ loadingSettings: true });
           const merged = deepMerge(get().settings, newSettings);
           await browser.storage.local.set({ settings: merged });
-          set({ settings: merged });
+          set({ settings: merged, loadingSettings: false });
         },
 
         removeSettings: async (keys) => {
+          set({ loadingSettings: true });
           const current = { ...get().settings };
           if (typeof keys === 'string') {
             delete current[keys];
@@ -68,12 +70,13 @@ export const useSettings = create<SettingsState>()(
             }
           }
           await browser.storage.local.set({ settings: current });
-          set({ settings: current });
+          set({ settings: current, loadingSettings: false });
         },
 
         clearSettings: async () => {
+          set({ loadingSettings: true });
           await browser.storage.local.remove('settings');
-          set({ settings: SETTINGS });
+          set({ settings: SETTINGS, loadingSettings: false });
         },
 
         resetSettings: async () => {

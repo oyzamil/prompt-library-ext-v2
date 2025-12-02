@@ -19,7 +19,6 @@ const PromptSelector: React.FC<PromptSelectorProps> = ({ ctx, prompts, targetEle
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [categoriesMap, setCategoriesMap] = useState<Record<string, Category>>({});
-  const [closeOnOutsideClick, setCloseOnOutsideClick] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const searchInputRef = useRef<InputRef>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -41,15 +40,6 @@ const PromptSelector: React.FC<PromptSelectorProps> = ({ ctx, prompts, targetEle
           categoryMap[cat.id] = cat;
         });
         setCategoriesMap(categoryMap);
-
-        //Load global settings
-        try {
-          const closeModalOnOutsideClick = await getGlobalSetting('closeModalOnOutsideClick');
-          setCloseOnOutsideClick(closeModalOnOutsideClick);
-        } catch (err) {
-          console.warn('Failed to load global settings:', err);
-          setCloseOnOutsideClick(true); // enabled by default
-        }
       } catch (err) {
         console.error(t('loadCategoriesFailed'), err);
       }
@@ -413,7 +403,6 @@ const PromptSelector: React.FC<PromptSelectorProps> = ({ ctx, prompts, targetEle
     <Modal
       isOpen
       onClose={onClose}
-      maskClosable={closeOnOutsideClick}
       styles={{
         content: {
           padding: 0,

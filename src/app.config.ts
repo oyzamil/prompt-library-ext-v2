@@ -19,7 +19,7 @@ export const config = {
       subscriptionId: null as string | null,
       status: null as string | null,
     },
-    placeholders: [] as string[],
+    closeModalOnOutsideClick: true as boolean,
   },
   ROUTES: {
     HOME: '/',

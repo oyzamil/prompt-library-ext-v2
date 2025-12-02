@@ -20,9 +20,8 @@ export const VariableInputModal: React.FC<VariableInputModalProps> = ({ prompt, 
   const firstInputRef = useRef<HTMLElement>(null);
   const inputRefs = useRef<(TextAreaRef | null)[]>([]);
 
-  // Focus first input
   useEffect(() => {
-    setTimeout(() => firstInputRef.current?.focus(), 1000);
+    setTimeout(() => firstInputRef.current?.focus(), 1000); // Focus first input
   }, []);
 
   // Keyboard shortcuts: Esc to cancel, Ctrl+Enter to submit, Tab for navigation
@@ -83,7 +82,7 @@ export const VariableInputModal: React.FC<VariableInputModalProps> = ({ prompt, 
   }, [variables.length]);
 
   return (
-    <Modal isOpen={true} title={t('fillVariableValues')} onClose={handleCancel} onOk={handleSubmit} okText={t('confirm')} cancelText={t('cancel')} maskClosable={true}>
+    <Modal isOpen={true} title={t('fillVariableValues')} onClose={handleCancel} onOk={handleSubmit} okText={t('confirm')} cancelText={t('cancel')}>
       <Alert description={t('pleaseEnterVariableValues')} className="p-2" type="warning" />
       <Form className="mt-3" layout="vertical">
         {variables.map((variable: string, index: number) => (

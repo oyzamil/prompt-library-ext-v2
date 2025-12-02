@@ -13,12 +13,15 @@ interface ModalProps extends Omit<AntdModalProps, 'title' | 'open' | 'onCancel'>
 }
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, noTitle = false, title, titleIcon, children, className, ...rest }) => {
+  const { settings } = useSettings();
+
   const TitleIcon = title === t('newPrompt') ? <PlusOutlined className="text-app-500" /> : <EditOutlined className="text-app-500" />;
 
   return (
     <AntdModal
       open={isOpen}
       onCancel={onClose}
+      maskClosable={settings.closeModalOnOutsideClick}
       title={
         noTitle ? null : (
           <div className="flex items-center gap-2">

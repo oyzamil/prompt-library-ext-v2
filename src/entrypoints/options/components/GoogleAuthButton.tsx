@@ -143,8 +143,8 @@ const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ onAuthSuccess }) =>
     return (
       <div className="flex flex-col items-center p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
         <div className="flex items-center mb-3">
-          <div className="w-8 h-8 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center mr-2">
-            <span className="text-blue-600 dark:text-blue-200 text-sm font-bold">{user.name.charAt(0)}</span>
+          <div className="w-8 h-8 bg-app-100 dark:bg-app-800 rounded-full flex items-center justify-center mr-2">
+            <span className="text-app-600 dark:text-app-200 text-sm font-bold">{user.name.charAt(0)}</span>
           </div>
           <div>
             <div className="text-sm font-medium text-gray-800 dark:text-gray-200">{user.name}</div>
@@ -165,7 +165,7 @@ const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ onAuthSuccess }) =>
     <button
       onClick={handleLogin}
       disabled={isLoading}
-      className="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 dark:focus:ring-offset-gray-800"
+      className="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white bg-app-600 border border-transparent rounded-md shadow-sm hover:bg-app-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-app-500 disabled:opacity-50 dark:focus:ring-offset-gray-800"
     >
       {isLoading ? (
         <svg className="w-5 h-5 text-white animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

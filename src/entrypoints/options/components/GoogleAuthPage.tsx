@@ -217,7 +217,7 @@ const GoogleAuthPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
-        <SectionHeading title={t('googleAuth')} description={t('googleAuthDescription')} icon={<GoogleOutlined className="text-white text-xl" />} />
+        <SectionHeading title={t('googleAuth')} description={t('googleAuthDescription')} icon={<GoogleOutlined className="text-white text-xl" />} colors={['from-app-500', 'to-blue-500']} />
 
         <Card
           title={

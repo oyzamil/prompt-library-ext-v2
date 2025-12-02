@@ -4,20 +4,14 @@ import { MessageOutlined, QuestionOutlined, SettingOutlined } from '@ant-design/
 import SectionHeading from './SectionHeading';
 
 const GlobalSettingsPage: React.FC = () => {
-  const [settings, setSettings] = useState<GlobalSettings>({
-    closeModalOnOutsideClick: true,
-  });
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
   const [shortcuts, setShortcuts] = useState<{ [key: string]: string }>({});
+  const { settings, saveSettings, loadingSettings } = useSettings();
 
   useEffect(() => {
     const loadSettings = async () => {
       try {
         setIsLoading(true);
-        const globalSettings = await getGlobalSettings();
-        setSettings(globalSettings);
-
         try {
           const commands = await browser.commands.getAll();
           const shortcutMap: { [key: string]: string } = {};
@@ -39,20 +33,6 @@ const GlobalSettingsPage: React.FC = () => {
 
     loadSettings();
   }, []);
-
-  const handleSettingChange = async (key: keyof GlobalSettings, value: any) => {
-    try {
-      setIsSaving(true);
-      const newSettings = { ...settings, [key]: value };
-      setSettings(newSettings);
-      await updateGlobalSettings({ [key]: value });
-    } catch (error) {
-      console.error('Failed to update setting:', error);
-      setSettings((prev) => ({ ...prev, [key]: settings[key] }));
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   const openShortcutSettings = () => {
     const isChrome = navigator.userAgent.includes('Chrome');
@@ -91,7 +71,12 @@ const GlobalSettingsPage: React.FC = () => {
             <h3>{t('closeModalOnOutsideClick')}</h3>
             <div className="flex items-center">
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('closeModalOnOutsideClickDescription')}</p>
-              <Switch defaultChecked checked={settings.closeModalOnOutsideClick} onChange={(checked) => handleSettingChange('closeModalOnOutsideClick', checked)} disabled={isSaving} />
+              <Switch
+                checked={settings.closeModalOnOutsideClick}
+                onChange={async (checked) => {
+                  await saveSettings({ closeModalOnOutsideClick: checked });
+                }}
+              />
             </div>
           </Card>
 
