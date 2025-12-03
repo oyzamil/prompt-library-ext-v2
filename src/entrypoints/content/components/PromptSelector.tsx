@@ -48,7 +48,6 @@ const PromptSelector: React.FC<PromptSelectorProps> = ({ ctx, prompts, targetEle
     loadData();
   }, []);
 
-  // Filter the prompt list - taking into account both search terms and category filters
   const filteredPrompts = prompts
     .filter((prompt) => {
       //First filter by category

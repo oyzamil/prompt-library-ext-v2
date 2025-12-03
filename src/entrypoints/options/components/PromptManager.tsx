@@ -24,6 +24,44 @@ const PromptManager = () => {
   // Add category related status
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [isLimited, setIsLimited] = useState(false);
+  const { settings } = useSettings();
+
+  useEffect(() => {
+    if (!settings) return;
+
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        await migratePromptsWithCategory();
+        const loadedPrompts = await storage.getItem<PromptItem[]>(`local:${BROWSER_STORAGE_KEY}`);
+
+        const storedPrompts = !settings.isLicensed ? loadedPrompts?.slice(0, settings.freeUserLimit) : loadedPrompts;
+
+        const sortedPrompts = (storedPrompts || []).sort((a, b) => {
+          if (a.pinned && !b.pinned) return -1;
+          if (!a.pinned && b.pinned) return 1;
+          const aOrder = a.sortOrder ?? 999999;
+          const bOrder = b.sortOrder ?? 999999;
+          return aOrder - bOrder;
+        });
+
+        setPrompts((prev) => (prev.length !== sortedPrompts.length || !prev.every((p, i) => p.id === sortedPrompts[i].id) ? sortedPrompts : prev));
+
+        setCategories(await getCategories());
+
+        // Calculate limit here directly
+        setIsLimited(!settings.isLicensed && (sortedPrompts?.length ?? 0) >= settings.freeUserLimit);
+      } catch (err) {
+        console.error(t('optionsPageLoadDataError'), err);
+        setError(t('loadDataFailed'));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, [settings]);
 
   // Get query parameters from URL
   useEffect(() => {
@@ -39,49 +77,6 @@ const PromptManager = () => {
         setIsModalOpen(true);
       }, 100);
     }
-  }, []);
-
-  // Load prompts and categories from storage
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setIsLoading(true);
-
-        // Migrate old data first
-        await migratePromptsWithCategory();
-
-        // Load prompt word
-        const storedPrompts = await storage.getItem<PromptItem[]>(`local:${BROWSER_STORAGE_KEY}`);
-
-        // Sort by sortOrder, top items first
-        const sortedPrompts = (storedPrompts || []).sort((a, b) => {
-          // Pinned items always come first
-          if (a.pinned && !b.pinned) return -1;
-          if (!a.pinned && b.pinned) return 1;
-
-          // In the same pinned state, sort by sortOrder
-          const aOrder = a.sortOrder !== undefined ? a.sortOrder : 999999;
-          const bOrder = b.sortOrder !== undefined ? b.sortOrder : 999999;
-          return aOrder - bOrder;
-        });
-
-        setPrompts(sortedPrompts);
-
-        // Load categories
-        const storedCategories = await getCategories();
-        setCategories(storedCategories);
-
-        console.log(t('optionsPageLoadPrompts'), storedPrompts?.length || 0);
-        console.log(t('optionsPageLoadCategories'), storedCategories.length);
-      } catch (err) {
-        console.error(t('optionsPageLoadDataError'), err);
-        setError(t('loadDataFailed'));
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
   }, []);
 
   // Filter prompts based on search term and selected category
@@ -122,9 +117,13 @@ const PromptManager = () => {
   // Save prompts to storage
   const savePrompts = async (newPrompts: PromptItem[]) => {
     try {
-      await storage.setItem<PromptItem[]>(`local:${BROWSER_STORAGE_KEY}`, newPrompts);
+      setIsLimited(!settings.isLicensed && (newPrompts?.length ?? 0) >= settings.freeUserLimit);
+
+      const storedPrompts = !settings.isLicensed ? newPrompts?.slice(0, settings.freeUserLimit) : newPrompts;
+
+      await storage.setItem<PromptItem[]>(`local:${BROWSER_STORAGE_KEY}`, storedPrompts);
       console.log(t('optionsPagePromptsSaved'));
-      setPrompts(newPrompts);
+      setPrompts(storedPrompts);
     } catch (err) {
       console.error(t('optionsPageSavePromptsError'), err);
       setError(t('savePromptsFailed'));
@@ -331,7 +330,7 @@ const PromptManager = () => {
               const existing = promptsMap.get(prompt.id);
               // Prompt words to be imported, merge existing prompt word attributes
               const updatedPrompt = { ...existing, ...prompt };
-              // 排除 lastModified 字段进行比较
+              // Exclude lastModified field from comparison
               if (existing && JSON.stringify((({ lastModified, ...rest }) => rest)(existing)) !== JSON.stringify((({ lastModified, ...rest }) => rest)(updatedPrompt))) {
                 promptsMap.set(prompt.id, updatedPrompt);
                 updatedCount++;
@@ -556,11 +555,12 @@ const PromptManager = () => {
             defaultOption: t('allCategories'),
           }}
           actionButtons={[
-            { label: t('export'), icon: <UploadOutlined />, onClick: exportPrompts, disabled: prompts.length === 0 },
-            { label: t('localImport'), icon: <DownloadOutlined />, onClick: triggerFileInput, type: 'primary' },
-            { label: t('remoteImport'), icon: <LinkOutlined />, onClick: openRemoteImportModal, type: 'primary' },
-            { label: t('addNewPrompt'), icon: <PlusOutlined />, onClick: openAddModal, type: 'primary' },
+            { label: t('export'), icon: <UploadOutlined />, onClick: exportPrompts, disabled: prompts.length === 0 || isLimited },
+            { label: t('localImport'), icon: <DownloadOutlined />, onClick: triggerFileInput, type: 'primary', disabled: isLimited },
+            { label: t('remoteImport'), icon: <LinkOutlined />, onClick: openRemoteImportModal, type: 'primary', disabled: isLimited },
+            { label: t('addNewPrompt'), icon: <PlusOutlined />, onClick: openAddModal, type: 'primary', disabled: isLimited },
           ]}
+          children={isLimited && <Alert type="error" description={t('promptsLimitReachedMessage')} showIcon />}
           alert={{
             type: 'error',
             message: t('operationFailed'),

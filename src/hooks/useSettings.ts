@@ -1,95 +1,268 @@
-import { browserStorage, syncStoreWithBrowserStorage } from '@/utils';
-import { create } from 'zustand';
-import { createJSONStorage, persist, subscribeWithSelector } from 'zustand/middleware';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 const { SETTINGS } = useAppConfig();
 type Settings = typeof SETTINGS;
 
+/**
+ * Deep merge two objects without changing references if values are identical.
+ */
 function deepMerge<T extends Record<string, any>>(target: T, source: DeepPartial<T>): T {
   const output = { ...target };
+
   Object.keys(source).forEach((key) => {
     const sourceVal = source[key as keyof DeepPartial<T>];
     const targetVal = target[key as keyof T];
 
-    if (sourceVal !== undefined) {
-      if (typeof sourceVal === 'object' && sourceVal !== null && typeof targetVal === 'object' && targetVal !== null) {
-        output[key as keyof T] = deepMerge(targetVal, sourceVal);
-      } else {
-        output[key as keyof T] = sourceVal as T[keyof T];
-      }
+    if (sourceVal === undefined) return;
+
+    if (sourceVal && typeof sourceVal === 'object' && !Array.isArray(sourceVal) && targetVal && typeof targetVal === 'object' && !Array.isArray(targetVal)) {
+      output[key as keyof T] = deepMerge(targetVal, sourceVal);
+    } else {
+      output[key as keyof T] = sourceVal as T[keyof T];
     }
   });
+
   return output;
 }
 
-interface SettingsState {
-  settings: Settings;
-  loadingSettings: boolean;
+/**
+ * Compare two objects deeply
+ */
+function isEqual(a: any, b: any): boolean {
+  if (a === b) return true;
+  if (a == null || b == null) return false;
+  if (typeof a !== 'object' || typeof b !== 'object') return a === b;
 
-  loadSettings: () => Promise<void>;
-  saveSettings: (newSettings: DeepPartial<Settings>) => Promise<void>;
-  removeSettings: (keys: keyof Settings | (keyof Settings)[]) => Promise<void>;
-  clearSettings: () => Promise<void>;
-  resetSettings: () => Promise<void>;
+  const keysA = Object.keys(a);
+  const keysB = Object.keys(b);
+
+  if (keysA.length !== keysB.length) return false;
+
+  return keysA.every((key) => isEqual(a[key], b[key]));
 }
 
-export const useSettings = create<SettingsState>()(
-  subscribeWithSelector(
-    persist(
-      (set, get) => ({
-        settings: SETTINGS,
-        loadingSettings: false,
+// Global state management without external dependencies
+class SettingsStore {
+  private settings: Settings = SETTINGS;
+  private listeners: Set<() => void> = new Set();
+  private loadingSettings = false;
+  private hasHydrated = false;
+  private hydrationPromise: Promise<void> | null = null;
 
-        loadSettings: async () => {
-          set({ loadingSettings: true });
-          return new Promise<void>((resolve) => {
-            browser.storage.local.get(['settings'], (result) => {
-              const stored = (result['settings'] as Settings) || {};
-              const merged = deepMerge(SETTINGS, stored);
-              set({ settings: merged, loadingSettings: false });
-              resolve();
-            });
-          });
-        },
+  constructor() {
+    // Auto-hydrate on initialization
+    this.hydrationPromise = this.loadSettings();
+    this.setupStorageListener();
+  }
 
-        saveSettings: async (newSettings) => {
-          set({ loadingSettings: true });
-          const merged = deepMerge(get().settings, newSettings);
-          await browser.storage.local.set({ settings: merged });
-          set({ settings: merged, loadingSettings: false });
-        },
+  private setupStorageListener() {
+    chrome.storage.onChanged.addListener((changes, areaName) => {
+      if (areaName === 'local' && changes['settings']) {
+        const newValue = changes['settings'].newValue;
+        if (newValue && !isEqual(this.settings, newValue)) {
+          this.settings = deepMerge(SETTINGS, newValue);
+          this.notifyListeners();
+        }
+      }
+    });
+  }
 
-        removeSettings: async (keys) => {
-          set({ loadingSettings: true });
-          const current = { ...get().settings };
-          if (typeof keys === 'string') {
-            delete current[keys];
-          } else {
-            for (const key of keys) {
-              delete current[key];
-            }
-          }
-          await browser.storage.local.set({ settings: current });
-          set({ settings: current, loadingSettings: false });
-        },
+  subscribe(listener: () => void) {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  }
 
-        clearSettings: async () => {
-          set({ loadingSettings: true });
-          await browser.storage.local.remove('settings');
-          set({ settings: SETTINGS, loadingSettings: false });
-        },
+  private notifyListeners() {
+    this.listeners.forEach((listener) => listener());
+  }
 
-        resetSettings: async () => {
-          await get().loadSettings();
-        },
-      }),
-      {
-        name: 'settings', // 🔑 this only persists the `settings` object, not the whole store
-        storage: createJSONStorage(() => browserStorage),
-        partialize: (state) => ({ settings: state.settings }), // ✅ prevents nesting
-      },
-    ),
-  ),
-);
+  getState() {
+    return {
+      settings: this.settings,
+      loadingSettings: this.loadingSettings,
+      hasHydrated: this.hasHydrated,
+    };
+  }
 
-syncStoreWithBrowserStorage(useSettings, 'settings');
+  async waitForHydration() {
+    if (this.hydrationPromise) {
+      await this.hydrationPromise;
+    }
+  }
+
+  async loadSettings(): Promise<void> {
+    this.loadingSettings = true;
+    this.notifyListeners();
+
+    try {
+      const result = await new Promise<Record<string, any>>((resolve) => {
+        chrome.storage.local.get(['settings'], (result) => {
+          resolve(result);
+        });
+      });
+
+      const stored = (result['settings'] as Settings) || {};
+      const merged = deepMerge(SETTINGS, stored);
+
+      if (!isEqual(this.settings, merged)) {
+        this.settings = merged;
+      }
+
+      this.hasHydrated = true;
+      this.loadingSettings = false;
+      this.notifyListeners();
+    } catch (error) {
+      console.error('Failed to load settings:', error);
+      this.hasHydrated = true;
+      this.loadingSettings = false;
+      this.notifyListeners();
+    }
+  }
+
+  async saveSettings(newSettings: DeepPartial<Settings>): Promise<void> {
+    const merged = deepMerge(this.settings, newSettings);
+
+    // Only save if different
+    if (isEqual(this.settings, merged)) {
+      return;
+    }
+
+    this.loadingSettings = true;
+    this.notifyListeners();
+
+    try {
+      await chrome.storage.local.set({ settings: merged });
+      this.settings = merged;
+      this.loadingSettings = false;
+      this.notifyListeners();
+    } catch (error) {
+      console.error('Failed to save settings:', error);
+      this.loadingSettings = false;
+      this.notifyListeners();
+    }
+  }
+
+  async removeSettings(keys: keyof Settings | (keyof Settings)[]): Promise<void> {
+    const current = { ...this.settings };
+    const keysArray = typeof keys === 'string' ? [keys] : keys;
+
+    keysArray.forEach((key) => {
+      delete current[key];
+    });
+
+    // Only save if changed
+    if (isEqual(this.settings, current)) {
+      return;
+    }
+
+    this.loadingSettings = true;
+    this.notifyListeners();
+
+    try {
+      await chrome.storage.local.set({ settings: current });
+      this.settings = current;
+      this.loadingSettings = false;
+      this.notifyListeners();
+    } catch (error) {
+      console.error('Failed to remove settings:', error);
+      this.loadingSettings = false;
+      this.notifyListeners();
+    }
+  }
+
+  async clearSettings(): Promise<void> {
+    this.loadingSettings = true;
+    this.notifyListeners();
+
+    try {
+      await chrome.storage.local.remove('settings');
+      this.settings = SETTINGS;
+      this.loadingSettings = false;
+      this.notifyListeners();
+    } catch (error) {
+      console.error('Failed to clear settings:', error);
+      this.loadingSettings = false;
+      this.notifyListeners();
+    }
+  }
+
+  async resetSettings(): Promise<void> {
+    await this.loadSettings();
+  }
+}
+
+// Singleton instance
+const settingsStore = new SettingsStore();
+
+/**
+ * React hook to use settings with automatic hydration
+ */
+export function useSettings() {
+  const [state, setState] = useState(() => settingsStore.getState());
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    // Wait for initial hydration
+    settingsStore.waitForHydration().then(() => {
+      if (isMountedRef.current) {
+        setState(settingsStore.getState());
+      }
+    });
+
+    // Subscribe to changes
+    const unsubscribe = settingsStore.subscribe(() => {
+      if (isMountedRef.current) {
+        setState(settingsStore.getState());
+      }
+    });
+
+    return () => {
+      isMountedRef.current = false;
+      unsubscribe();
+    };
+  }, []);
+
+  const saveSettings = useCallback(async (newSettings: DeepPartial<Settings>) => {
+    await settingsStore.saveSettings(newSettings);
+  }, []);
+
+  const removeSettings = useCallback(async (keys: keyof Settings | (keyof Settings)[]) => {
+    await settingsStore.removeSettings(keys);
+  }, []);
+
+  const clearSettings = useCallback(async () => {
+    await settingsStore.clearSettings();
+  }, []);
+
+  const resetSettings = useCallback(async () => {
+    await settingsStore.resetSettings();
+  }, []);
+
+  const loadSettings = useCallback(async () => {
+    await settingsStore.loadSettings();
+  }, []);
+
+  return {
+    settings: state.settings,
+    loadingSettings: state.loadingSettings,
+    hasHydrated: state.hasHydrated,
+    saveSettings,
+    removeSettings,
+    clearSettings,
+    resetSettings,
+    loadSettings,
+  };
+}
+
+export async function getSettings() {
+  return await settingsStore.loadSettings();
+}
+/**
+ * Utility hook to check if settings have been hydrated
+ */
+export function useHydrated(): boolean {
+  const { hasHydrated } = useSettings();
+  return hasHydrated;
+}

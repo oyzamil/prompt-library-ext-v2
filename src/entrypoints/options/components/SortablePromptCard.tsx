@@ -110,7 +110,7 @@ const SortablePromptCard: React.FC<SortablePromptCardProps> = ({ prompt, categor
         actions={actions}
         className={`${isDragging ? 'shadow-lg scale-90 ring-2 ring-app-500 ring-opacity-50' : ''}`}
         title={
-          <div className={`${prompt.pinned ? 'bg-linear-to-r from-amber-50 to-app-600/20' : 'bg-linear-to-r from-app-600/5 to-white'} py-2 px-4 rounded-t-lg`}>
+          <div className={cn(prompt.pinned ? 'from-white to-app-600/10' : 'from-app-600/10 to-white', 'bg-linear-to-l py-2 px-4 rounded-t-lg')}>
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center flex-1 min-w-0 gap-2">
                 {/* Pin icon*/}
@@ -144,17 +144,7 @@ const SortablePromptCard: React.FC<SortablePromptCardProps> = ({ prompt, categor
           title={''}
           description={
             <>
-              <div className="mb-3">
-                {(prompt.tags?.length ?? 0) > 0 ? (
-                  prompt.tags.map((tag) => (
-                    <Tag key={tag} color="blue">
-                      #{tag}
-                    </Tag>
-                  ))
-                ) : (
-                  <Tag color="blue">{t('noTags')}</Tag>
-                )}
-              </div>
+              <div className="mb-3">{(prompt.tags?.length ?? 0) > 0 ? prompt.tags.map((tag) => <Tag key={tag}>#{tag}</Tag>) : <Tag>{t('noTags')}</Tag>}</div>
 
               <p
                 className="text-sm text-gray-600 mb-4 truncate cursor-pointer hover:text-gray-800 transition-colors duration-200"

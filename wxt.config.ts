@@ -21,7 +21,7 @@ export default defineConfig({
   }),
   modules: ['@wxt-dev/module-react', '@wxt-dev/auto-icons'],
   srcDir: 'src',
-  manifest: () => {
+  manifest: ({ browser, manifestVersion, mode, command }) => {
     const defaultChrome = '509806635063-m19ppgekifuo0jhlrjpsshahp59m38bf';
     const defaultWeb = '509806635063-b3lip3rck8qcu1lm2vfsjuud39gfjtuk';
     const finalChromeClientId = import.meta.env.WXT_CHROME_APP_CLIENT_ID_PREFIX || defaultChrome;
@@ -29,20 +29,15 @@ export default defineConfig({
 
     // console.log({finalChromeClientId, finalWebClientId});
 
-    return {
+    // development
+    const manifestBase: any = {
       name: appConfig.APP.NAME,
       description: '__MSG_appDescription__',
       default_locale: 'en',
-      key: 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1gIStuzmtlJx9myPcEdZVB6fN6HZ4RDB2FNbhhhd1Q8kopHP3uZioJmGAbZch13CNg4nwDLzkT/Iv+SuQ92r6wEYf14rwv0pyLvegLlTWcKvpG+XfJXMl0AT32Gj2tuOoMceEpNRXZzcPf2QTftX4Lm3Kzv3kmeaIzHps1ajkT18iagllKExzmiQVZjCw/t8NYcY5cdjKQRhQqDTDqv5HnVanucEWmDPMb+AlyHOqAYxDurSt/IX1C5TW/khkCU8Fahcnw50ppVgIVKT7OLtSKDDNlqbC4BWIFWu55S5UR/CZNEbyjDtxzLkfVTi8sov7ZOUCTjEvRwjNmwXbo8PZwIDAQAB',
       permissions: ['storage', 'contextMenus', 'identity'],
       oauth2: {
         client_id: `${finalChromeClientId}.apps.googleusercontent.com`,
         scopes: ['https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile'],
-      },
-      browser_specific_settings: {
-        gecko: {
-          id: import.meta.env.WXT_FIREFOX_EXTENSION_ID,
-        },
       },
       commands: {
         'open-prompt-selector': {
@@ -67,5 +62,19 @@ export default defineConfig({
         },
       ],
     };
+    if (browser === 'firefox') {
+      manifestBase.browser_specific_settings = {
+        gecko: {
+          id: import.meta.env.WXT_FIREFOX_EXTENSION_ID,
+        },
+      };
+    }
+    if (mode === 'development') {
+      console.log(browser);
+      manifestBase.key =
+        'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1gIStuzmtlJx9myPcEdZVB6fN6HZ4RDB2FNbhhhd1Q8kopHP3uZioJmGAbZch13CNg4nwDLzkT/Iv+SuQ92r6wEYf14rwv0pyLvegLlTWcKvpG+XfJXMl0AT32Gj2tuOoMceEpNRXZzcPf2QTftX4Lm3Kzv3kmeaIzHps1ajkT18iagllKExzmiQVZjCw/t8NYcY5cdjKQRhQqDTDqv5HnVanucEWmDPMb+AlyHOqAYxDurSt/IX1C5TW/khkCU8Fahcnw50ppVgIVKT7OLtSKDDNlqbC4BWIFWu55S5UR/CZNEbyjDtxzLkfVTi8sov7ZOUCTjEvRwjNmwXbo8PZwIDAQAB';
+    }
+
+    return manifestBase;
   },
 });

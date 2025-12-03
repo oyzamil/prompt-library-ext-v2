@@ -6,6 +6,10 @@ import { t } from '@/utils/i18n';
 // Main message handler
 export const handleRuntimeMessage = async (message: any, sender: Browser.runtime.MessageSender, sendResponse: (response?: any) => void) => {
   console.log('[MSG_RECEIVED V3] Background received message:', message, 'from sender:', sender);
+  if (message.action === 'OPEN_LINK' && message?.url) {
+    browser.tabs.create({ url: message.url });
+    return { success: true };
+  }
 
   // Existing message handlers
   if (message.action === 'getPrompts') {

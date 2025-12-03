@@ -6,7 +6,7 @@ import SectionHeading from './SectionHeading';
 const GlobalSettingsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [shortcuts, setShortcuts] = useState<{ [key: string]: string }>({});
-  const { settings, saveSettings, loadingSettings } = useSettings();
+  const { settings, saveSettings } = useSettings();
 
   useEffect(() => {
     const loadSettings = async () => {

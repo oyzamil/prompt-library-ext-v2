@@ -50,10 +50,11 @@ type SectionHeadingProps = {
   searchBar?: SearchBarProps;
   select?: SelectProps;
   actionButtons?: ActionButtonProps[];
+  children?: ReactNode;
   alert?: SectionAlertProps;
 };
 
-export default function SectionHeading({ title, description, icon, stats = [], className, colors, searchBar, select, actionButtons = [], alert }: SectionHeadingProps) {
+export default function SectionHeading({ title, description, icon, stats = [], className, colors, searchBar, select, actionButtons = [], children, alert }: SectionHeadingProps) {
   const gradient = colors?.length ? cn('bg-linear-to-br', colors) : 'bg-linear-to-br from-blue-500 to-indigo-600';
 
   return (
@@ -118,6 +119,8 @@ export default function SectionHeading({ title, description, icon, stats = [], c
               </div>
             </div>
           )}
+
+          {children && children}
         </div>
       )}
       {/* Error Container  */}

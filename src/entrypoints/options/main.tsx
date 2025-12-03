@@ -8,12 +8,10 @@ import { HashRouter } from 'react-router-dom';
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider>
-      <ProtectedRoute>
-        <HashRouter>
-          <App />
-        </HashRouter>
-        <LicenseModal />
-      </ProtectedRoute>
+      <HashRouter>
+        <App />
+      </HashRouter>
+      <LicenseModal />
     </ThemeProvider>
   </StrictMode>,
 );

@@ -15,7 +15,7 @@ export const LicenseModal: React.FC = () => {
   const handleVerify = async () => {
     try {
       const { email, licenseKey } = await form.validateFields();
-      await updateState(setStates, { loading: true });
+      updateState(setStates, { loading: true });
 
       const response = await axios.post(GUMROAD_API, {
         product_id: GUMROAD.GUMROAD_PRODUCT_ID,
@@ -39,23 +39,23 @@ export const LicenseModal: React.FC = () => {
 
       message.success('Subscription verified successfully.');
       const licenseData = {
+        licenseModalVisible: false,
+        isLicensed: true,
+        email,
         licenseInfo: {
-          email,
           verificationDate: new Date().toISOString(),
-          isLicensed: true,
-          licenseModalVisible: false,
           subscriptionId: data.purchase.subscription_id,
           status: data.purchase.subscription_status,
           licenseKey,
         },
       };
 
-      await saveSettings(licenseData);
+      saveSettings(licenseData);
     } catch (error: any) {
       console.error('Subscription verification failed:', error);
       message.error(error?.response?.data?.message || 'License verification failed.');
     } finally {
-      await updateState(setStates, { loading: false });
+      updateState(setStates, { loading: false });
     }
   };
 
@@ -65,16 +65,16 @@ export const LicenseModal: React.FC = () => {
     const result = await checkSubscriptionStatus(settings.licenseInfo.licenseKey);
 
     if (result.success) {
-      await saveSettings({
+      saveSettings({
+        isLicensed: result.isLicensed,
         licenseInfo: {
-          isLicensed: result.isLicensed,
           subscriptionId: result.subscriptionId,
           status: result.subscriptionStatus,
         } as any,
       });
     } else {
       console.warn('License recheck failed:', result.error);
-      await saveSettings({
+      saveSettings({
         isLicensed: false,
         licenseInfo: {
           status: 'expired',

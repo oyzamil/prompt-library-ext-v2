@@ -1,6 +1,6 @@
 {
   "appDescription": {
-    "message": "Quickly insert preset Prompt content in web input fields through commands."
+    "message": "Save, organize, and access your most-used prompts in seconds with Propmt Library."
   },
   "openPromptSelector": {
     "message": "Open the prompt selector popup"
@@ -1332,5 +1332,11 @@
   },
   "unpinPrompt": {
     "message": "Unpin prompt"
+  },
+  "premiumRequiredMessage": {
+    "message": "Purchase a plan to access this feature."
+  },
+  "promptsLimitReachedMessage": {
+    "message": "You reached free user limit. Delete some prompts to add new or purchase premium."
   }
 }

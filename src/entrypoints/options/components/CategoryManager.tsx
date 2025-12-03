@@ -540,7 +540,7 @@ const CategoryManager = () => {
             allowClear: true,
           }}
           actionButtons={[
-            { label: categories.length === 0 ? t('noCategoriesToExport') : t('exportAllCategories'), icon: <UploadOutlined />, onClick: exportCategories, disabled: categories.length === 0 },
+            { label: categories.length === 0 ? t('noCategoriesToExport') : t('export'), icon: <UploadOutlined />, onClick: exportCategories, disabled: categories.length === 0 },
             { label: t('localImportCategories'), icon: <DownloadOutlined />, onClick: triggerFileInput, type: 'primary' },
             { label: t('remoteImportCategories'), icon: <LinkOutlined />, onClick: openRemoteImportModal, type: 'primary' },
             { label: t('addCategory'), icon: <PlusOutlined />, onClick: openAddModal, type: 'primary' },

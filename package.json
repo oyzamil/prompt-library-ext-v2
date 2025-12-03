@@ -1,8 +1,8 @@
 {
   "name": "prompt-library",
-  "description": "A starter template to make browser extension using WXT",
+  "description": "Save, organize, and access your most-used prompts in seconds with Propmt Library.",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.4",
   "type": "module",
   "scripts": {
     "dev": "wxt",

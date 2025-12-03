@@ -1,7 +1,8 @@
 import { NavLink } from 'react-router-dom';
-import NotionLogo from './NotionLogo';
 import { Button } from 'antd';
 import { ApartmentOutlined, CloseOutlined, MenuOutlined, SettingOutlined, TagOutlined } from '@ant-design/icons';
+import { GoogleIcon, NotionIcon } from '@/icons';
+import { useAntd } from '@/providers/ThemeProvider';
 
 interface SidebarProps {
   className?: string;
@@ -10,6 +11,14 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isLimited, setIsLimited] = useState(false);
+  const { settings } = useSettings();
+  const { message } = useAntd();
+
+  useEffect(() => {
+    if (!settings) return;
+    setIsLimited(!settings.isLicensed);
+  }, [settings]);
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -87,16 +96,16 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
           )}
 
           {/* Navigation */}
-          <nav className="space-y-2">
+          <nav className="flex flex-col gap-2">
             {menuItems.map((item) => (
               <NavLink
                 key={item.path}
                 to={item.path}
                 onClick={closeSidebar}
                 className={({ isActive }) =>
-                  `group flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
+                  `group flex items-center px-3 py-3 text-sm font-medium rounded ${
                     isActive
-                      ? 'bg-blue-50 dark:bg-app-900/50 text-app-700 dark:text-app-300 border-r-2 border-app-700 dark:border-app-400 shadow-sm'
+                      ? 'bg-app-100/10 dark:bg-app-900/50 text-app-700 dark:text-app-300 border-l-2 rounded-l-none border-app-700 dark:border-app-400 shadow-sm'
                       : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 hover:shadow-sm'
                   }`
                 }
@@ -113,40 +122,37 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
 
         {/* bottom area */}
         <div className="p-4 border-t border-gray-200 dark:border-gray-700 w-full">
-          <div className="mb-3 space-y-1">
-            {/* <NavLink
-              to="/integrations/notion"
-              onClick={closeSidebar}
-              className={({ isActive }) =>
-                `group flex items-center px-3 py-2 text-sm rounded-lg transition-all duration-200 ${
-                  isActive
-                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200'
-                }`
-              }
-            >
-              <NotionLogo />
-              {t('notionSync')}
+          <div className="mb-3 flex flex-col gap-2">
+            {/* Notion Link  */}
+            {/* <NavLink to="/integrations/notion" className="w-full">
+              {({ isActive }) => (
+                <Button block variant={isActive ? 'solid' : 'filled'} color="default" onClick={closeSidebar} className="flex items-center gap-2">
+                  <NotionIcon className="shrink-0 w-5 h-5" />
+                  {t('notionSync')}
+                </Button>
+              )}
             </NavLink> */}
-            <NavLink
-              to="/integrations/google"
-              onClick={closeSidebar}
-              className={({ isActive }) =>
-                `group flex items-center px-3 py-2 text-sm rounded-lg transition-all duration-200 ${
-                  isActive
-                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200'
-                }`
-              }
-            >
-              <svg className="shrink-0 mr-2 w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-                <path d="M1 1h22v22H1z" fill="none" />
-              </svg>
-              {t('googleAuth')}
+
+            {/* Google Link  */}
+            <NavLink to={isLimited ? '' : '/integrations/google'} className="w-full" key="google-login">
+              {({ isActive }) => (
+                <Button
+                  block
+                  // disabled={isLimited}
+                  variant={isActive ? 'solid' : 'filled'}
+                  color="default"
+                  onClick={() => {
+                    if (isLimited) {
+                      message.error(t('premiumRequiredMessage'));
+                    }
+                    closeSidebar();
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <GoogleIcon className="shrink-0 w-5 h-5" />
+                  {t('googleAuth')}
+                </Button>
+              )}
             </NavLink>
           </div>
           <div className="space-y-1 text-xs text-center text-gray-500 dark:text-gray-400">
