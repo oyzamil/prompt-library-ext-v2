@@ -118,8 +118,8 @@ export const VariableInputModal: React.FC<VariableInputModalProps> = ({ prompt, 
           </Form.Item>
         ))}
       </Form>
-      <Title level={5}>{t('preview')}</Title>
-      <Alert description={renderHighlightedPreview()} className="p-2" type="warning" />
+      {/* <Title level={5}>{t('preview')}</Title>
+      <Alert description={renderHighlightedPreview()} className="p-2" type="warning" /> */}
     </Modal>
   );
 };

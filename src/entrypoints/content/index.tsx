@@ -12,154 +12,43 @@ export default defineContentScript({
     let lastInputValue = '';
     let isPromptSelectorOpen = false;
 
-    // Helper: Get all text content up to a specific node and offset
-    const getTextUpToPosition = (container: Node, targetNode: Node, targetOffset: number): string => {
-      let text = '';
-      let found = false;
-
-      const traverse = (node: Node): boolean => {
-        if (found) return true;
-
-        if (node === targetNode) {
-          if (node.nodeType === Node.TEXT_NODE) {
-            text += node.textContent?.substring(0, targetOffset) || '';
-          }
-          found = true;
-          return true;
-        }
-
-        if (node.nodeType === Node.TEXT_NODE) {
-          text += node.textContent || '';
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-          const element = node as HTMLElement;
-          // Handle line breaks
-          if (element.tagName === 'BR') {
-            text += '\n';
-          }
-          for (let i = 0; i < node.childNodes.length; i++) {
-            if (traverse(node.childNodes[i])) {
-              return true;
-            }
-          }
-        }
-
-        return false;
-      };
-
-      traverse(container);
-      return text;
-    };
-
-    // Helper: Get the full text content preserving structure
+    // Get the content of the contenteditable element
     const getContentEditableValue = (element: HTMLElement): string => {
-      const clonedElement = element.cloneNode(true) as HTMLElement;
-
-      // Replace <br> with newlines
-      clonedElement.querySelectorAll('br').forEach((br) => {
-        br.replaceWith('\n');
-      });
-
-      // Replace <div> with newlines (WhatsApp uses divs for line breaks)
-      clonedElement.querySelectorAll('div').forEach((div) => {
-        if (div.previousSibling) {
-          div.prepend(document.createTextNode('\n'));
-        }
-      });
-
-      return clonedElement.textContent || '';
+      return element.textContent || '';
     };
 
-    // Helper: Set content while preserving cursor position
+    // Set the content of the contenteditable element
     const setContentEditableValue = (element: HTMLElement, value: string): void => {
-      const selection = window.getSelection();
-      let cursorOffset = 0;
-
-      // Save cursor position
-      if (selection && selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        if (element.contains(range.startContainer)) {
-          cursorOffset = getTextUpToPosition(element, range.startContainer, range.startOffset).length;
-        }
-      }
-
-      // For WhatsApp and similar apps, use innerText to preserve some formatting
-      // or insert text at cursor instead of replacing everything
-      const useInnerText = element.querySelector('span, div, br') !== null;
-
-      if (useInnerText) {
-        element.innerText = value;
-      } else {
-        element.textContent = value;
-      }
-
-      // Trigger input event
-      const inputEvent = new InputEvent('input', { bubbles: true, cancelable: true });
+      element.textContent = value;
+      // Trigger the input event to notify other listeners of content changes
+      const inputEvent = new InputEvent('input', { bubbles: true });
       element.dispatchEvent(inputEvent);
-
-      // Restore cursor position
-      setTimeout(() => {
-        try {
-          const sel = window.getSelection();
-          if (sel) {
-            const textContent = getContentEditableValue(element);
-            const newOffset = Math.min(cursorOffset, textContent.length);
-
-            // Find the text node at the desired offset
-            let currentOffset = 0;
-            let targetNode: Node | null = null;
-            let targetOffset = 0;
-
-            const findNode = (node: Node): boolean => {
-              if (node.nodeType === Node.TEXT_NODE) {
-                const nodeLength = node.textContent?.length || 0;
-                if (currentOffset + nodeLength >= newOffset) {
-                  targetNode = node;
-                  targetOffset = newOffset - currentOffset;
-                  return true;
-                }
-                currentOffset += nodeLength;
-              } else {
-                for (let i = 0; i < node.childNodes.length; i++) {
-                  if (findNode(node.childNodes[i])) return true;
-                }
-              }
-              return false;
-            };
-
-            findNode(element);
-
-            if (targetNode) {
-              const range = document.createRange();
-              range.setStart(targetNode, targetOffset);
-              range.setEnd(targetNode, targetOffset);
-              sel.removeAllRanges();
-              sel.addRange(range);
-            }
-          }
-        } catch (error) {
-          console.error('Failed to restore cursor position:', error);
-        }
-      }, 0);
     };
 
-    const createEditableAdapter = (element: HTMLElement): EditableElement => {
+    // Create adapters to uniformly handle different types of input elements
+    const createEditableAdapter = (element: HTMLElement | HTMLInputElement | HTMLTextAreaElement): EditableElement => {
+      // Process standard input elements
       if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
         return element;
-      } else if (element.getAttribute('contenteditable') === 'true') {
+      }
+      // Handling contenteditable elements
+      else if (element.getAttribute('contenteditable') === 'true') {
         const adapter = {
-          _element: element,
+          _element: element, // 保存原始元素引用
           get value(): string {
             return getContentEditableValue(element);
           },
           set value(newValue: string) {
             setContentEditableValue(element, newValue);
           },
+          // contenteditable 元素没有原生的 selectionStart 属性，
+          // 但可以通过 selection API 获取当前光标位置
           get selectionStart(): number {
             const selection = window.getSelection();
             if (selection && selection.rangeCount > 0) {
               const range = selection.getRangeAt(0);
               if (element.contains(range.startContainer)) {
-                return getTextUpToPosition(element, range.startContainer, range.startOffset).length;
+                return range.startOffset;
               }
             }
             return 0;
@@ -170,57 +59,21 @@ export default defineContentScript({
           setSelectionRange(start: number, end: number): void {
             try {
               const selection = window.getSelection();
-              if (!selection) return;
-
-              selection.removeAllRanges();
-              const range = document.createRange();
-
-              // Find the node and offset for the start position
-              let currentOffset = 0;
-              let startNode: Node | null = null;
-              let startOffset = 0;
-              let endNode: Node | null = null;
-              let endOffset = 0;
-
-              const findNodes = (node: Node): void => {
-                if (node.nodeType === Node.TEXT_NODE) {
-                  const nodeLength = node.textContent?.length || 0;
-
-                  if (!startNode && currentOffset + nodeLength >= start) {
-                    startNode = node;
-                    startOffset = start - currentOffset;
-                  }
-
-                  if (!endNode && currentOffset + nodeLength >= end) {
-                    endNode = node;
-                    endOffset = end - currentOffset;
-                  }
-
-                  currentOffset += nodeLength;
-                } else if (node.nodeType === Node.ELEMENT_NODE) {
-                  for (let i = 0; i < node.childNodes.length; i++) {
-                    if (startNode && endNode) break;
-                    findNodes(node.childNodes[i]);
-                  }
+              if (selection) {
+                selection.removeAllRanges();
+                const range = document.createRange();
+                // 尝试在文本节点中设置范围
+                let textNode = element.firstChild;
+                if (!textNode) {
+                  textNode = document.createTextNode('');
+                  element.appendChild(textNode);
                 }
-              };
-
-              findNodes(element);
-
-              if (startNode && endNode) {
-                range.setStart(startNode, startOffset);
-                range.setEnd(endNode, endOffset);
-                selection.addRange(range);
-              } else if (element.childNodes.length > 0) {
-                // Fallback: place cursor at the end
-                const lastChild = element.childNodes[element.childNodes.length - 1];
-                const offset = lastChild.nodeType === Node.TEXT_NODE ? lastChild.textContent?.length || 0 : 0;
-                range.setStart(lastChild, offset);
-                range.setEnd(lastChild, offset);
+                range.setStart(textNode, Math.min(start, textNode.textContent?.length || 0));
+                range.setEnd(textNode, Math.min(end, textNode.textContent?.length || 0));
                 selection.addRange(range);
               }
             } catch (error) {
-              console.error('Setting contenteditable cursor position failed:', error);
+              console.error('设置 contenteditable 光标位置失败:', error);
             }
           },
           dispatchEvent(event: Event): boolean {
@@ -232,19 +85,24 @@ export default defineContentScript({
       return null as unknown as EditableElement;
     };
 
+    // Universal function: Get the currently focused input box element (if any)
     const getFocusedTextInput = (): EditableElement | null => {
       const activeElement = document.activeElement;
 
       if (activeElement instanceof HTMLInputElement || activeElement instanceof HTMLTextAreaElement) {
         return activeElement;
-      } else if (activeElement instanceof HTMLElement && activeElement.getAttribute('contenteditable') === 'true') {
+      }
+      // Support contenteditable elements
+      else if (activeElement instanceof HTMLElement && activeElement.getAttribute('contenteditable') === 'true') {
         return createEditableAdapter(activeElement);
       }
       return null;
     };
 
+    // Generic function: Open options page and pass selected text
     const openOptionsWithText = async (text: string) => {
       try {
+        // Instead of using the tabs API directly, send messages to background scripts
         const response = await browser.runtime.sendMessage({
           action: 'openOptionsPageWithText',
           text: text,
@@ -305,29 +163,44 @@ export default defineContentScript({
       }
     };
 
+    // Used to record the last content of an editable element
     const contentEditableValuesMap = new WeakMap<HTMLElement, string>();
 
+    // Listen to input box input events
     document.addEventListener('input', async (event) => {
+      // Checks whether the event target is a standard input element (input box or text field)
       if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
         const inputElement = event.target as HTMLInputElement | HTMLTextAreaElement;
         const value = inputElement.value;
 
+        // Check if "/p" has been entered and the pop-up window has not yet opened
         if (value?.toLowerCase()?.endsWith('/p') && lastInputValue !== value && !isPromptSelectorOpen) {
           lastInputValue = value;
+
+          // Use a generic function to open the prompt word selector
           await openPromptSelector(inputElement);
         } else if (!value?.toLowerCase()?.endsWith('/p')) {
+          // Update last input value
           lastInputValue = value;
         }
-      } else if (event.target instanceof HTMLElement && event.target.getAttribute('contenteditable') === 'true') {
+      }
+      // Support input detection for contenteditable elements
+      else if (event.target instanceof HTMLElement && event.target.getAttribute('contenteditable') === 'true') {
         const editableElement = event.target as HTMLElement;
         const adapter = createEditableAdapter(editableElement);
         const value = adapter.value;
+
+        // Get the last value, or an empty string if there is none
         const lastValue = contentEditableValuesMap.get(editableElement) || '';
 
+        // Check if "/p" has been entered and the pop-up window has not yet opened
         if (value?.toLowerCase()?.endsWith('/p') && lastValue !== value && !isPromptSelectorOpen) {
           contentEditableValuesMap.set(editableElement, value);
+
+          // Use a generic function to open the prompt word selector
           await openPromptSelector(adapter);
         } else if (!value?.toLowerCase()?.endsWith('/p')) {
+          // Update last input value
           contentEditableValuesMap.set(editableElement, value);
         }
       }

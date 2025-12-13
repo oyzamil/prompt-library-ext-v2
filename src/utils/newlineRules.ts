@@ -11,7 +11,8 @@ const RULES: Rule[] = [{ pattern: /chatgpt\.com/i, strategy: 'br' }];
 
 export function getNewlineStrategy(url: string): NewlineStrategy {
   const rule = RULES.find((r) => r.pattern.test(url));
-  return rule ? rule.strategy : 'text';
+  return rule?.strategy ?? 'br';
+  // return rule ? rule.strategy : 'text';
 }
 
 function escapeHtml(input: string): string {

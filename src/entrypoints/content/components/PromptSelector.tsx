@@ -431,7 +431,7 @@ const PromptSelector: React.FC<PromptSelectorProps> = ({ ctx, prompts, targetEle
           </Select>
         </div>
 
-        <div ref={listRef} className="flex flex-col max-h-[345px] overflow-y-scroll prompt-items">
+        <div ref={listRef} className="flex flex-col max-h-86.25 overflow-y-scroll prompt-items">
           {filteredPrompts.length > 0 ? (
             filteredPrompts.map((prompt, index) => {
               const category = categoriesMap[prompt.categoryId];

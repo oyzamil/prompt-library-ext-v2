@@ -1,10 +1,14 @@
 # Prompt Library
 
-Save, organize, and access your most-used prompts in seconds with Propmt Library.
+Save, organize, and access your most-used prompts in seconds with Prompt Library.
 
-Propmt Library is a powerful browser extension focused on prompt management and quick input. It helps you create, manage, and organize a library of prompts, and lets you quickly insert preset prompt content into any input field on a webpage — significantly improving your efficiency when interacting with AI tools.
+![Prompt Library](screenshots/ext-thumb.png)
+
+Prompt Library is a powerful browser extension focused on prompt management and quick input. It helps you create, manage, and organize a library of prompts, and lets you quickly insert preset prompt content into any input field on a webpage — significantly improving your efficiency when interacting with AI tools.
 
 ---
+
+## ![Prompt Library](screenshots/prompt-library-useage.png)
 
 ## 🔥 Core Features
 
