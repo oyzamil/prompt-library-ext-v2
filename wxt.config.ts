@@ -21,6 +21,10 @@ export default defineConfig({
   }),
   modules: ['@wxt-dev/module-react', '@wxt-dev/auto-icons'],
   srcDir: 'src',
+  autoIcons: {
+    baseIconPath: 'assets/icon.png',
+	sizes: [128, 64, 48, 32, 16],
+  },
   manifest: ({ browser, manifestVersion, mode, command }) => {
     const defaultChrome = '509806635063-m19ppgekifuo0jhlrjpsshahp59m38bf';
     const defaultWeb = '509806635063-b3lip3rck8qcu1lm2vfsjuud39gfjtuk';

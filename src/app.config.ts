@@ -2,7 +2,7 @@ import { defineAppConfig } from 'wxt/utils/define-app-config';
 export const config = {
   APP: {
     name: 'Prompt Library',
-    fullName: 'Propmt Library: LLM Prompt Saver & Organizer',
+    fullName: 'Prompt Library: LLM Prompt Saver & Organizer',
     tagLine: 'Organize, save and manage your prompts',
     color: '#006251',
     font: 'Poppins',
