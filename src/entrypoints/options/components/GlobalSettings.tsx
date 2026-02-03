@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Alert, Button, Card, Switch } from 'antd';
+import { Alert, Button, Card, Segmented, Switch } from 'antd';
 import { MessageOutlined, QuestionOutlined, SettingOutlined } from '@ant-design/icons';
 import SectionHeading from './SectionHeading';
 
@@ -52,29 +52,59 @@ const GlobalSettingsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <SectionHeading title={t('globalSettings')} description={t('globalSettingsDescription')} icon={<SettingOutlined className="text-white text-xl" />} />
 
         <div className="space-y-6">
           <Card
+          
             title={
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-                  <MessageOutlined className="text-purple-600" />
+                <div className="w-8 h-8 bg-app-500 dark:bg-black rounded-lg flex items-center justify-center">
+                  <SettingOutlined className="text-white" />
+                </div>
+                <span>App Settings</span>
+              </div>
+            }
+            
+          >
+            <div className="flex w-full justify-between">
+              <span>Theme</span>
+              <span>
+                <Segmented
+                  value={settings.theme}
+                  onChange={(theme: 'light' | 'dark' | 'system') => {
+                    saveSettings({ theme });
+                  }}
+                  options={[
+                    { label: 'Light', value: 'light' },
+                    { label: 'Dark', value: 'dark' },
+                    { label: 'System', value: 'system' },
+                  ]}
+                  className="w-full"
+                />
+              </span>
+            </div>
+          </Card>
+          <Card
+            title={
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-app-500 dark:bg-black rounded-lg flex items-center justify-center">
+                  <MessageOutlined className="text-white" />
                 </div>
                 <span>{t('modalBehavior')}</span>
               </div>
             }
-            variant="borderless"
+            
           >
             <h3>{t('closeModalOnOutsideClick')}</h3>
             <div className="flex items-center">
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('closeModalOnOutsideClickDescription')}</p>
+              <p className="text-sm text-theme-dim mt-1">{t('closeModalOnOutsideClickDescription')}</p>
               <Switch
                 checked={settings.closeModalOnOutsideClick}
                 onChange={async (checked) => {
-                  await saveSettings({ closeModalOnOutsideClick: checked });
+                  saveSettings({ closeModalOnOutsideClick: checked });
                 }}
               />
             </div>
@@ -85,49 +115,37 @@ const GlobalSettingsPage: React.FC = () => {
             title={
               <>
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                    <QuestionOutlined className="text-green-600" />
+                  <div className="w-8 h-8 bg-app-500 dark:bg-black rounded-lg flex items-center justify-center">
+                    <QuestionOutlined className="text-white" />
                   </div>
                   <span>{t('keyboardShortcuts')}</span>
                 </div>
               </>
             }
-            variant="borderless"
+            
           >
             {/*  */}
             <div className="space-y-4">
-              <p className="text-sm text-gray-600 dark:text-gray-400">{t('shortcutsDescription')}</p>
+              <p className="text-sm text-theme-dim">{t('shortcutsDescription')}</p>
 
               <div className="space-y-3">
-                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div className="flex items-center justify-between p-4 bg-theme-dim rounded-lg">
                   <div>
-                    <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">{t('openPromptSelector')}</h4>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{t('openPromptSelectorDescription')}</p>
+                    <h4 className="text-sm font-medium">{t('openPromptSelector')}</h4>
+                    <p className="text-xs text-theme-dim">{t('openPromptSelectorDescription')}</p>
                   </div>
                   <div className="flex items-center space-x-2">
-                    {shortcuts['open-prompt-selector'] ? (
-                      <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600">
-                        {shortcuts['open-prompt-selector']}
-                      </kbd>
-                    ) : (
-                      <span className="text-xs text-gray-400 dark:text-gray-500">{t('notSet')}</span>
-                    )}
+                    {shortcuts['open-prompt-selector'] ? <kbd className="dark:bg-black">{shortcuts['open-prompt-selector']}</kbd> : <span className="text-xs text-theme-dim">{t('notSet')}</span>}
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div className="flex items-center justify-between p-4 bg-theme-dim rounded-lg">
                   <div>
-                    <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">{t('openOptionsPage')}</h4>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{t('openOptionsPageDescription')}</p>
+                    <h4 className="text-sm font-medium">{t('openOptionsPage')}</h4>
+                    <p className="text-xs text-theme-dim">{t('openOptionsPageDescription')}</p>
                   </div>
                   <div className="flex items-center space-x-2">
-                    {shortcuts['open-options'] ? (
-                      <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600">
-                        {shortcuts['open-options']}
-                      </kbd>
-                    ) : (
-                      <span className="text-xs text-gray-400 dark:text-gray-500">{t('notSet')}</span>
-                    )}
+                    {shortcuts['open-options'] ? <kbd className="dark:bg-black">{shortcuts['open-options']}</kbd> : <span className="text-xs text-theme-dim">{t('notSet')}</span>}
                   </div>
                 </div>
               </div>

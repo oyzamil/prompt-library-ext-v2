@@ -49,14 +49,17 @@ const StaticComponents = ({ children, shadowContainer, popupContainer, theme, cs
         theme={{
           algorithm: currentAlgorithm,
           token: {
-            colorPrimary: useAppConfig().APP.COLOR_PRIMARY,
-            fontFamily: [useAppConfig().APP.FONT_FAMILY, token.fontFamily].toString(),
+            colorPrimary: useAppConfig().APP.color,
+            fontFamily: [useAppConfig().APP.font, token.fontFamily].toString(),
           },
           components: {
             Alert: {
               defaultPadding: '12px',
               withDescriptionPadding: '12px',
               withDescriptionIconSize: 18,
+            },
+            Button: {
+              primaryShadow: 'none',
             },
           },
         }}

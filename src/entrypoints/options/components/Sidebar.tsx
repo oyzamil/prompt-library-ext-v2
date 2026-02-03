@@ -1,8 +1,8 @@
-import { NavLink } from 'react-router-dom';
-import { Button } from 'antd';
-import { ApartmentOutlined, CloseOutlined, MenuOutlined, SettingOutlined, TagOutlined } from '@ant-design/icons';
-import { GoogleIcon, NotionIcon } from '@/icons';
+import { GoogleIcon } from '@/icons';
 import { useAntd } from '@/providers/ThemeProvider';
+import { ApartmentOutlined, CloseOutlined, MenuOutlined, SettingOutlined, TagOutlined } from '@ant-design/icons';
+import { Button } from 'antd';
+import { NavLink } from 'react-router-dom';
 
 interface SidebarProps {
   className?: string;
@@ -17,7 +17,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
 
   useEffect(() => {
     if (!settings) return;
-    setIsLimited(!settings.isLicensed);
+    setIsLimited(!settings.licenseInfo.isLicensed);
   }, [settings]);
 
   useEffect(() => {
@@ -74,7 +74,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
 
       <aside
         className={`
-          bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 
+          bg-white dark:bg-black border-r border-theme 
           transition-all duration-300 ease-in-out flex flex-col
           ${isMobile ? 'fixed' : 'relative'} 
           ${isMobile ? 'z-40' : 'z-0'}
@@ -103,17 +103,16 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
                 to={item.path}
                 onClick={closeSidebar}
                 className={({ isActive }) =>
-                  `group flex items-center px-3 py-3 text-sm font-medium rounded ${
-                    isActive
-                      ? 'bg-app-100/10 dark:bg-app-900/50 text-app-700 dark:text-app-300 border-l-2 rounded-l-none border-app-700 dark:border-app-400 shadow-sm'
-                      : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 hover:shadow-sm'
-                  }`
+                  cn(
+                    'group flex items-center px-3 py-3 text-sm font-medium rounded',
+                    isActive ? 'bg-app-100 dark:bg-[#141414] text-app-500 dark:text-app-300 border-l-2 border-app-500' : 'text-app-500 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-app-900',
+                  )
                 }
               >
                 <span className="shrink-0 mr-3">{item.icon}</span>
                 <div className="flex-1 min-w-0">
                   <div className="font-medium">{item.name}</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 mt-0.5">{item.description}</div>
+                  <div className="text-xs text-theme-dim mt-0.5">{item.description}</div>
                 </div>
               </NavLink>
             ))}
@@ -121,7 +120,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
         </div>
 
         {/* bottom area */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700 w-full">
+        <div className="p-4 border-t border-theme w-full">
           <div className="mb-3 flex flex-col gap-2">
             {/* Notion Link  */}
             {/* <NavLink to="/integrations/notion" className="w-full">
@@ -141,9 +140,10 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
                   // disabled={isLimited}
                   variant={isActive ? 'solid' : 'filled'}
                   color="default"
-                  onClick={() => {
+                  onClick={(e) => {
                     if (isLimited) {
                       message.error(t('premiumRequiredMessage'));
+                      e.preventDefault();
                     }
                     closeSidebar();
                   }}
@@ -155,9 +155,9 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
               )}
             </NavLink>
           </div>
-          <div className="space-y-1 text-xs text-center text-gray-500 dark:text-gray-400">
+          <div className="space-y-1 text-xs text-center text-theme-dim">
             <p>
-              © {new Date().getFullYear()} {useAppConfig().APP.NAME}
+              © {new Date().getFullYear()} {useAppConfig().APP.name}
             </p>
           </div>
         </div>

@@ -1,7 +1,7 @@
-import { Modal as AntdModal, ModalProps as AntdModalProps } from 'antd';
-import React, { ReactNode, RefObject } from 'react';
 import { t } from '@/utils/i18n';
 import { EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { Modal as AntdModal, ModalProps as AntdModalProps } from 'antd';
+import React, { ReactNode } from 'react';
 
 interface ModalProps extends Omit<AntdModalProps, 'title' | 'open' | 'onCancel'> {
   isOpen?: boolean;
@@ -20,6 +20,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, noTitle = false, title, 
   return (
     <AntdModal
       open={isOpen}
+      centered
       onCancel={onClose}
       maskClosable={settings.closeModalOnOutsideClick}
       title={
@@ -30,7 +31,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, noTitle = false, title, 
           </div>
         )
       }
-      className={cn('min-w-[700px] w-[80%]', className)}
+      className={cn('min-w-175 w-[80%]', className)}
       {...rest}
     >
       {children}

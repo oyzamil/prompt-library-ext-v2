@@ -1,14 +1,15 @@
-import { useEffect, useState, useRef } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
-import Sidebar from './components/Sidebar';
-import PromptManager from './components/PromptManager';
-import CategoryManager from './components/CategoryManager';
-import NotionIntegrationPage from './components/NotionIntegrationPage';
-import GoogleAuthPage from './components/GoogleAuthPage';
-import GlobalSettings from './components/GlobalSettings';
-import ToastContainer from './components/ToastContainer';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
+import { Route, Routes, useLocation } from 'react-router-dom';
+import CategoryManager from './components/CategoryManager';
+import GlobalSettings from './components/GlobalSettings';
+import GoogleAuthPage from './components/GoogleAuthPage';
+import NotionIntegrationPage from './components/NotionIntegrationPage';
+import PromptManager from './components/PromptManager';
+import Sidebar from './components/Sidebar';
+import ToastContainer from './components/ToastContainer';
 const App = () => {
+  const { settings } = useSettings();
   // Add back to top button related state
   const [showBackToTop, setShowBackToTop] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -43,7 +44,7 @@ const App = () => {
   };
   const location = useLocation();
   return (
-    <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+    <div className="h-screen flex flex-col transition-colors duration-200">
       <Header />
 
       <div className="flex flex-1 overflow-hidden">
@@ -54,7 +55,7 @@ const App = () => {
           <div className="md:hidden h-16 shrink-0 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700"></div>
 
           {/* main content area */}
-          <div ref={scrollContainerRef} className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900 relative">
+          <div ref={scrollContainerRef} className="flex-1 overflow-auto relative">
             <AnimatePresence mode="wait">
               <motion.div
                 key={location.pathname}
@@ -68,8 +69,12 @@ const App = () => {
                   <Route path="" element={<PromptManager />} />
                   <Route path="categories" element={<CategoryManager />} />
                   <Route path="settings" element={<GlobalSettings />} />
-                  <Route path="integrations/notion" element={<NotionIntegrationPage />} />
-                  <Route path="integrations/google" element={<GoogleAuthPage />} />
+                  {settings.licenseInfo.isLicensed && (
+                    <>
+                      <Route path="integrations/notion" element={<NotionIntegrationPage />} />
+                      <Route path="integrations/google" element={<GoogleAuthPage />} />
+                    </>
+                  )}
                 </Routes>
               </motion.div>
             </AnimatePresence>

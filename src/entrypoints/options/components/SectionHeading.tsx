@@ -1,6 +1,6 @@
-import { ReactNode } from 'react';
-import { Input, Select, Button, Badge, Alert } from 'antd';
 import type { AlertProps as AntdAlertProps } from 'antd';
+import { Alert, Badge, Button, Input, Select } from 'antd';
+import { ReactNode } from 'react';
 
 export type HeadingStat = {
   color?: string;
@@ -55,7 +55,7 @@ type SectionHeadingProps = {
 };
 
 export default function SectionHeading({ title, description, icon, stats = [], className, colors, searchBar, select, actionButtons = [], children, alert }: SectionHeadingProps) {
-  const gradient = colors?.length ? cn('bg-linear-to-br', colors) : 'bg-linear-to-br from-blue-500 to-indigo-600';
+  const gradient = colors?.length ? cn('bg-linear-to-br', colors) : 'bg-linear-to-br from-app-500 to-app-600';
 
   return (
     <div className={cn('mb-4', className)}>
@@ -63,12 +63,12 @@ export default function SectionHeading({ title, description, icon, stats = [], c
       <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
         <div className="space-y-2">
           <div className="flex items-center space-x-3">
-            {icon && <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center shadow-lg', gradient)}>{icon}</div>}
+            {icon && <div className={cn('w-10 h-10 rounded-lg flex items-center justify-center', gradient)}>{icon}</div>}
 
             <h1 className={cn('text-2xl font-bold bg-clip-text text-transparent', gradient.replace('to-br', 'to-r'))}>{title}</h1>
           </div>
 
-          {description && <p className="text-gray-600 dark:text-gray-300 max-w-2xl">{description}</p>}
+          {description && <p className="text-theme-dim max-w-2xl">{description}</p>}
 
           {stats.length > 0 && (
             <div className="flex flex-wrap gap-4 mt-6">
@@ -76,7 +76,7 @@ export default function SectionHeading({ title, description, icon, stats = [], c
                 .filter((s) => s.show !== false)
                 .map((s, i) => (
                   <Badge key={i} count={s.count} color={cn(s.color ?? colors?.[0] ?? '#f5222d')}>
-                    <span className="text-sm font-medium bg-white py-2 px-3 shadow rounded-md">{s.label}</span>
+                    <span className="text-sm font-medium bg-theme-dim py-2 px-3 rounded-md border-theme border">{s.label}</span>
                   </Badge>
                 ))}
             </div>
@@ -86,7 +86,7 @@ export default function SectionHeading({ title, description, icon, stats = [], c
 
       {/* Toolbar: Search + Category + Action Buttons */}
       {(searchBar || (select?.options?.length ?? 0) > 0 || actionButtons.length > 0) && (
-        <div className="mt-6 flex gap-4 flex-col items-center bg-white p-4 shadow rounded-md">
+        <div className="mt-6 flex gap-4 flex-col items-center bg-theme-dim p-4 rounded-md border-theme border">
           {/* Search + Category */}
           <div className="flex gap-3 w-full">
             {searchBar && (

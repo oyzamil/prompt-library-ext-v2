@@ -4,6 +4,7 @@ import { createContextMenus, handleContextMenuClick } from '@/utils/browser/cont
 import { setupNotificationHandlers } from '@/utils/browser/notificationManager';
 import { setupStorageChangeListeners } from '@/utils/browser/storageManager';
 import { handleRuntimeMessage } from '@/utils/browser/messageHandler';
+import { config } from '@/app.config';
 
 export default defineBackground(() => {
   console.log('Hello background!', { id: browser.runtime.id });
@@ -44,6 +45,19 @@ export default defineBackground(() => {
 
   // Extension lifecycle events
   browser.runtime.onInstalled.addListener(async (details) => {
+    if (import.meta.env.PROD) {
+      if (details.reason === 'install') {
+        browser.tabs.create({
+          url: `${config.APP.extensionPage}?event=${getPackageProp('name')}-install`,
+        });
+      }
+
+      if (details.reason === 'update') {
+        browser.tabs.create({
+          url: `${config.APP.extensionPage}?event=${getPackageProp('name')}-update`,
+        });
+      }
+    }
     if (details.reason === 'install') {
       console.log('Background script: Extension first installation');
       await initializeDefaultData();

@@ -40,7 +40,7 @@ const GoogleAuthPage: React.FC = () => {
   const startPeriodicAuthCheck = () => {
     // Check login status every 10 seconds
     periodicCheckerRef.current = window.setInterval(async () => {
-      const result = await browser.storage.local.get('google_user_info');
+      const result = await browser.storage.local.get('google_user_info') as any;
       // Update only when status changes
       if ((result.google_user_info && !user) || (!result.google_user_info && user)) {
         console.log(t('loginStatusChanged'));
@@ -66,7 +66,7 @@ const GoogleAuthPage: React.FC = () => {
     setIsLoading(true);
     try {
       // Get user information from local storage
-      const result = await browser.storage.local.get('google_user_info');
+      const result = await browser.storage.local.get('google_user_info') as any;
       if (result.google_user_info) {
         setUser(result.google_user_info);
         setError(null); // Clear any error status
@@ -165,7 +165,7 @@ const GoogleAuthPage: React.FC = () => {
     // Set up status change detection
     const checkInterval = window.setInterval(async () => {
       try {
-        const result = await browser.storage.local.get('google_auth_status');
+        const result = await browser.storage.local.get('google_auth_status') as any;
         if (result.google_auth_status) {
           const status = result.google_auth_status.status;
           const timestamp = result.google_auth_status.timestamp;
@@ -215,23 +215,22 @@ const GoogleAuthPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
-        <SectionHeading title={t('googleAuth')} description={t('googleAuthDescription')} icon={<GoogleOutlined className="text-white text-xl" />} colors={['from-app-500', 'to-blue-500']} />
+        <SectionHeading title={t('googleAuth')} description={t('googleAuthDescription')} icon={<GoogleOutlined className="text-white text-xl" />} />
 
         <Card
           title={
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-app-100/10 dark:bg-app-900/30 rounded-lg flex items-center justify-center">
-                <SafetyOutlined className="text-app-600" />
+              <div className="w-8 h-8 bg-app-500 dark:bg-black rounded-lg flex items-center justify-center">
+                <SafetyOutlined className="text-white" />
               </div>
               <span>{t('accountAuthentication')}</span>
             </div>
           }
-          variant="borderless"
         >
-          <div className="space-y-4 text-gray-600 dark:text-gray-400">
-            <p className="text-gray-600 dark:text-gray-400 mb-6">{t('googleAuthDescription')}</p>
+          <div className="space-y-4">
+            <p className="mb-6">{t('googleAuthDescription')}</p>
           </div>
           <div className="flex flex-col justify-center ">
             {user ? (
@@ -273,15 +272,14 @@ const GoogleAuthPage: React.FC = () => {
         <Card
           title={
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-                <InfoCircleOutlined className="text-purple-600" />
+              <div className="w-8 h-8 bg-app-500 dark:bg-black rounded-lg flex items-center justify-center">
+                <InfoCircleOutlined className="text-white" />
               </div>
               <span>{t('googleAuthExplanation')}</span>
             </div>
           }
-          variant="borderless"
         >
-          <div className="space-y-4 text-gray-600 dark:text-gray-400">
+          <div className="space-y-4">
             <p>{t('googleAuthBenefits')}</p>
             <ul className="list-disc pl-5 space-y-2">
               <li>{t('secureCloudStorage')}</li>

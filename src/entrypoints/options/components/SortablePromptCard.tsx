@@ -1,7 +1,7 @@
-import React from 'react';
-import { useSortable } from '@dnd-kit/sortable';
-import { Alert, Button, Card, Popconfirm, Switch, Tag } from 'antd';
 import { CheckOutlined, ClockCircleOutlined, CopyOutlined, DeleteFilled, DragOutlined, FormOutlined, NotificationOutlined, PushpinFilled } from '@ant-design/icons';
+import { useSortable } from '@dnd-kit/sortable';
+import { Alert, Button, Card, Popconfirm, Switch, Tooltip } from 'antd';
+import React from 'react';
 
 interface SortablePromptCardProps {
   prompt: PromptItem;
@@ -62,68 +62,27 @@ const SortablePromptCard: React.FC<SortablePromptCardProps> = ({ prompt, categor
     }
   };
 
-  const actions: React.ReactNode[] = [
-    <>
-      {onTogglePinned && (
-        <Button
-          onClick={() => onTogglePinned(prompt.id, !prompt.pinned)}
-          type="default"
-          className={`${prompt.pinned && 'bg-amber-100 border-amber-300 text-amber-700'} transition-all duration-300`}
-          title={prompt.pinned ? t('unpinPrompt') : t('pinPrompt')}
-          icon={prompt.pinned ? <PushpinFilled className="rotate-135" /> : <PushpinFilled className="-rotate-45" />}
-        >
-          {prompt.pinned ? t('unpin') : t('pin')}
-        </Button>
-      )}
-    </>,
-
-    <Button
-      onClick={() => onCopy(prompt.content, prompt.id)}
-      type="default"
-      className={`${copiedId === prompt.id && 'bg-app-100/50 text-app-700 border border-app-500'} transition-all duration-300`}
-      icon={copiedId === prompt.id ? <CheckOutlined /> : <CopyOutlined />}
-    >
-      {copiedId === prompt.id ? t('copied') : t('copy')}
-    </Button>,
-
-    <Button onClick={() => onEdit(prompt.id)} type="primary" icon={<FormOutlined />}>
-      {t('edit')}
-    </Button>,
-    <Popconfirm
-      title={t('confirmDeletePrompt')}
-      description={<p className="max-w-[300px]">{t('confirmDeletePromptMessage')}</p>}
-      onConfirm={() => onDelete(prompt.id)}
-      // onCancel={cancel}
-      okText={t('delete')}
-      cancelText={t('cancel')}
-    >
-      <Button icon={<DeleteFilled />} type="primary" danger>
-        {t('delete')}
-      </Button>
-    </Popconfirm>,
-  ];
-
   return (
     <>
       <Card
         ref={setNodeRef}
-        actions={actions}
+        // actions={actions}
         className={`${isDragging ? 'shadow-lg scale-90 ring-2 ring-app-500 ring-opacity-50' : ''}`}
         title={
-          <div className={cn(prompt.pinned ? 'from-white to-app-600/10' : 'from-app-600/10 to-white', 'bg-linear-to-l py-2 px-4 rounded-t-lg')}>
+          <div className={cn(prompt.pinned ? 'from-white dark:from-black to-app-600/10' : 'from-app-600/10 to-white dark:to-black', 'bg-linear-to-l py-2 px-4 rounded-t-lg')}>
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center flex-1 min-w-0 gap-2">
                 {/* Pin icon*/}
-                {prompt.pinned && <PushpinFilled className="-rotate-45 text-app-600" />}
-                <h3 className="text-lg font-semibold text-gray-800 truncate">{prompt.title}</h3>
+                {prompt.pinned && <PushpinFilled className="-rotate-45" />}
+                <h3 className="text-lg font-semibold truncate">{prompt.title}</h3>
               </div>
 
               <div className="flex items-center gap-2 shrink-0">
                 {/* Classification identification */}
                 {category && (
                   <div className="flex items-center">
-                    <div className="w-3 h-3 rounded-full mr-1.5" style={{ backgroundColor: category.color || useAppConfig().APP.COLOR_PRIMARY }} />
-                    <span className="text-xs text-gray-600 dark:text-gray-300 font-medium">{category.name}</span>
+                    <div className="w-3 h-3 rounded-full mr-1.5" style={{ backgroundColor: category.color || useAppConfig().APP.color }} />
+                    <span className="text-xs text-theme-dim font-medium">{category.name}</span>
                   </div>
                 )}
 
@@ -134,6 +93,9 @@ const SortablePromptCard: React.FC<SortablePromptCardProps> = ({ prompt, categor
           </div>
         }
         styles={{
+          body: {
+            padding: 0,
+          },
           header: {
             padding: 0,
             minHeight: 0,
@@ -141,36 +103,86 @@ const SortablePromptCard: React.FC<SortablePromptCardProps> = ({ prompt, categor
         }}
       >
         <Card.Meta
-          title={''}
           description={
             <>
-              <div className="mb-3">{(prompt.tags?.length ?? 0) > 0 ? prompt.tags.map((tag) => <Tag key={tag}>#{tag}</Tag>) : <Tag>{t('noTags')}</Tag>}</div>
-
-              <p
-                className="text-sm text-gray-600 mb-4 truncate cursor-pointer hover:text-gray-800 transition-colors duration-200"
-                title={`${prompt.content}\n\n${t('clickToCopy') || 'Click to copy content'}`}
-                onClick={() => onCopy(prompt.content, prompt.id)}
-              >
-                {prompt.content}
-              </p>
-
-              {prompt.notes && prompt.notes.trim() && <Alert message={t('notes')} description={prompt.notes} type="warning" icon={<NotificationOutlined />} showIcon />}
-
-              <div className="flex items-center justify-between text-xs mt-4">
-                <div className="flex items-center space-x-2">
-                  <ClockCircleOutlined />
-                  <span>
-                    {t('lastModified')}: {formatLastModified(prompt.lastModified)}
-                  </span>
+              <div className="p-4 space-y-3">
+                <div>
+                  {(prompt.tags?.length ?? 0) > 0 ? (
+                    prompt.tags.map((tag) => (
+                      <span className="kbd" key={tag}>
+                        #{tag}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="kbd">{t('noTags')}</span>
+                  )}
                 </div>
 
-                {/* Enabled status */}
-                {onToggleEnabled && (
-                  <label className="inline-flex items-center cursor-pointer gap-2">
-                    <Switch checked={prompt.enabled !== undefined ? prompt.enabled : true} onChange={(checked) => onToggleEnabled(prompt.id, checked)} />
-                    <span>{prompt.enabled !== undefined ? (prompt.enabled ? t('enabled') : t('disabled')) : t('enabled')}</span>
-                  </label>
+                <p
+                  className="text-sm truncate cursor-pointer text-theme"
+                  title={`${prompt.content}\n\n${t('clickToCopy') || 'Click to copy content'}`}
+                  onClick={() => onCopy(prompt.content, prompt.id)}
+                >
+                  {prompt.content}
+                </p>
+
+                {prompt.notes && prompt.notes.trim() && <Alert message={t('notes')} description={prompt.notes} type="warning" icon={<NotificationOutlined />} showIcon />}
+
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center space-x-2">
+                    <ClockCircleOutlined />
+                    <span>
+                      {t('lastModified')}: {formatLastModified(prompt.lastModified)}
+                    </span>
+                  </div>
+
+                  {/* Enabled status */}
+                  {onToggleEnabled && (
+                    <label className="inline-flex items-center cursor-pointer gap-2">
+                      <Switch checked={prompt.enabled !== undefined ? prompt.enabled : true} onChange={(checked) => onToggleEnabled(prompt.id, checked)} />
+                      <span>{prompt.enabled !== undefined ? (prompt.enabled ? t('enabled') : t('disabled')) : t('enabled')}</span>
+                    </label>
+                  )}
+                </div>
+              </div>
+              {/* Footer Buttons  */}
+              <div className="flex gap-2 justify-end p-3 border-t border-theme">
+                <Tooltip title={t('delete')}>
+                  <Popconfirm
+                    title={t('confirmDeletePrompt')}
+                    description={<p className="max-w-70">{t('confirmDeletePromptMessage')}</p>}
+                    onConfirm={() => onDelete(prompt.id)}
+                    // onCancel={cancel}
+                    okText={t('delete')}
+                    cancelText={t('cancel')}
+                  >
+                    <Button icon={<DeleteFilled />} type="primary" danger />
+                  </Popconfirm>
+                </Tooltip>
+                {onTogglePinned && (
+                  <Tooltip title={prompt.pinned ? t('unpin') : t('pin')}>
+                    <Button
+                      onClick={() => onTogglePinned(prompt.id, !prompt.pinned)}
+                      type="default"
+                      className={`${prompt.pinned && 'bg-amber-100 border-amber-300 text-amber-700'} transition-all duration-300`}
+                      title={prompt.pinned ? t('unpinPrompt') : t('pinPrompt')}
+                      icon={prompt.pinned ? <PushpinFilled className="rotate-135" /> : <PushpinFilled className="-rotate-45" />}
+                    />
+                  </Tooltip>
                 )}
+
+                <Tooltip title={copiedId === prompt.id ? t('copied') : t('copy')}>
+                  <Button
+                    onClick={() => onCopy(prompt.content, prompt.id)}
+                    type="default"
+                    className={`${copiedId === prompt.id && 'bg-app-100/50 text-app-700 border border-app-500'} transition-all duration-300`}
+                    icon={copiedId === prompt.id ? <CheckOutlined /> : <CopyOutlined />}
+                  />
+                </Tooltip>
+
+                <Tooltip title={t('edit')}>
+                  <Button onClick={() => onEdit(prompt.id)} type="primary" icon={<FormOutlined />} />
+                </Tooltip>
               </div>
             </>
           }

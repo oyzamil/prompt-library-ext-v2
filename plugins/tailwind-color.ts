@@ -10,26 +10,30 @@ function toRgbWithAlpha(hex: string) {
   return `rgb(${r} ${g} ${b} / <alpha-value>)`;
 }
 
+function mix(color: any, target: string, amount: number) {
+  return color.mix(Color(target), amount).hex();
+}
+
 export default plugin.withOptions(
   () => {
     // no custom utilities needed, just theme extension
     return function () {};
   },
   () => {
-    const themeColor = config.APP.COLOR_PRIMARY;
-    const base = Color(themeColor);
+    const themeColor = config.APP.color;
+    const base = Color(themeColor).lab();
 
     const shades = {
-      50: base.lighten(0.9).hex(),
-      100: base.lighten(0.7).hex(),
-      200: base.lighten(0.5).hex(),
-      300: base.lighten(0.3).hex(),
-      400: base.lighten(0.1).hex(),
+      50: mix(base, '#ffffff', 0.95),
+      100: mix(base, '#ffffff', 0.85),
+      200: mix(base, '#ffffff', 0.7),
+      300: mix(base, '#ffffff', 0.55),
+      400: mix(base, '#ffffff', 0.3),
       500: base.hex(),
-      600: base.darken(0.1).hex(),
-      700: base.darken(0.3).hex(),
-      800: base.darken(0.5).hex(),
-      900: base.darken(0.7).hex(),
+      600: mix(base, '#000000', 0.1),
+      700: mix(base, '#000000', 0.25),
+      800: mix(base, '#000000', 0.45),
+      900: mix(base, '#000000', 0.65),
     };
 
     // convert to alpha-aware form

@@ -3,7 +3,6 @@
 @import 'tailwindcss';
 
 @plugin "./../../plugins/tailwind-color";
-@plugin "./../../plugins/tailwind-slider";
 @plugin "./../../plugins/tailwind-scrollbar";
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -37,26 +36,68 @@
     font-style: normal;
   }
 
-  body {
-    @apply relative bg-white font-['Poppins']!;
+  body:not(#content-ui) {
+    @apply relative font-['Poppins']!;
   }
   * {
-    @apply scrollbar:size-1 scrollbar-track:bg-gray-300 scrollbar-thumb:bg-app-500 dark:scrollbar-thumb:bg-zinc-900 dark:scrollbar-track:bg-zinc-600;
+    @apply scrollbar:size-1 scrollbar-track:bg-app-100 dark:scrollbar-track:bg-neutral-400 scrollbar-thumb:bg-neutral-400 scrollbar-thumb:rounded-full dark:scrollbar-thumb:bg-neutral-600 selection:bg-app-100 selection:text-app-500;
   }
-  label {
-    @apply font-bold text-gray-700 text-sm mb-1 block;
+  label:not(.ant-segmented-item) {
+    @apply font-bold text-black text-sm mb-1 block dark:text-white;
+  }
+  mark {
+    @apply bg-app-500 mx-0.5 rounded px-1 whitespace-nowrap text-white;
   }
   .ant-alert-message {
     @apply mb-0! font-bold;
   }
   .ant-alert-message,
   .ant-alert-description {
-    @apply text-[12px]! text-gray-500!;
+    @apply text-[12px]! text-black dark:text-neutral-400;
   }
 }
 @layer components {
+  .add-border {
+    @apply rounded-md border border-neutral-200  dark:border-neutral-800 p-2;
+  }
+  .bg-theme {
+    @apply bg-white dark:bg-black;
+  }
+  .bg-theme-dim {
+    @apply bg-[#f5f5f5] dark:bg-[#1f1f1f];
+  }
+  .bg-theme-inverse {
+    @apply bg-neutral-950 dark:bg-white;
+  }
+  .text-theme {
+    @apply text-black dark:text-white;
+  }
+  .text-theme-dim {
+    @apply text-gray-700/50 dark:text-neutral-400;
+  }
+  .text-theme-inverse {
+    @apply text-white dark:text-black;
+  }
+  .border-theme {
+    @apply dark:border-neutral-800 border-neutral-200;
+  }
+  .border-theme-inverse {
+    @apply border-neutral-800 dark:border-neutral-200;
+  }
+  .input-theme {
+    @apply border-neutral-200 bg-gray-100 dark:border-black dark:bg-black;
+  }
+  .bg-grid-pattern {
+    @apply bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[24px_24px];
+  }
+  .bg-dotted-pattern {
+    @apply bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] bg-size-[16px_16px] dark:bg-[radial-gradient(#000000_1px,transparent_1px)];
+  }
   .flex-center {
     @apply flex items-center justify-center;
+  }
+  .flex-col-center {
+    @apply flex flex-col items-center justify-center;
   }
   .ant-form-item-inline {
     @apply w-full;
@@ -71,17 +112,16 @@
     @apply pb-0.5;
   }
   .prompt-item {
-    @apply flex flex-col p-4 space-y-2 border-solid border-b border-gray-200 transition-all duration-100 relative;
+    @apply flex flex-col p-4 space-y-2 transition-all duration-100 relative  border-b border-solid border-b-neutral-200 dark:border-b-neutral-800;
+  }
+  .prompt-item.active {
+    @apply border-l-4 border-l-app-500;
   }
   .prompt-item::before,
   .prompt-item::after {
     @apply absolute inset-0 opacity-0 transition-opacity duration-500;
     border-radius: inherit;
     content: '';
-  }
-
-  .prompt-item.selected-item {
-    @apply border-l-4 border-l-app-500;
   }
 
   .prompt-item:hover::before {
@@ -97,22 +137,86 @@
     background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), var(--spot-color-light), transparent 40%);
     z-index: 1;
   }
-}
-
-@layer utilities {
   .underline {
-    @apply hover:text-app-500 decoration-app-500 dark:decoration-app-400 dark:hover:decoration-app-500 dark:focus:ring-app-400/40 rounded-sm underline decoration-2 underline-offset-2 transition duration-100;
+    @apply hover:text-app-500 decoration-app-500 dark:decoration-app-400 dark:hover:decoration-app-500 rounded-sm underline decoration-2 underline-offset-2 transition duration-100;
   }
   .ant-app {
     @apply flex h-[inherit] flex-col;
   }
   .glass {
-    @apply min-h-[70px] w-full rounded-md bg-linear-to-r from-transparent to-white/30 p-8 mix-blend-hard-light shadow-md backdrop-blur-lg;
+    @apply to-app-900/10 dark:to-app-500/20 w-full rounded-md bg-linear-to-r from-transparent p-2 backdrop-blur-md backdrop-saturate-100 dark:from-black;
   }
   .font-digital {
     font-family: 'DS-Digital', monospace;
   }
-  kbd {
-    @apply mx-1 my-0.5 inline-flex min-h-5 items-center justify-center rounded border border-gray-300 text-app-500 bg-white px-1.5 py-0.5 text-xs font-semibold shadow-sm dark:border-gray-600 dark:bg-gray-700;
+  kbd,
+  .kbd {
+    @apply mx-1 my-0.5 inline-flex min-h-5 items-center justify-center rounded border border-neutral-200 text-app-500 dark:text-white bg-white px-1.5 py-0.5 text-xs font-semibold shadow-sm dark:border-neutral-800 dark:bg-[#1f1f1f];
+  }
+
+  .animate-spark {
+    /* 0.8s spark + 1s pause = 1.8s total */
+    animation: spark 1.8s ease-out infinite;
+  }
+
+  .animate-spark-fast {
+    /* 0.5s spark + 1s pause = 1.5s total */
+    animation: spark-fast 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+
+  @keyframes spark {
+    /* spark happens here */
+    0% {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+
+    15% {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+
+    40% {
+      opacity: 0.8;
+      transform: scale(1);
+    }
+
+    /* pause zone */
+    60%,
+    100% {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+  }
+
+  @keyframes spark-fast {
+    /* spark */
+    0% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+
+    20% {
+      opacity: 1;
+      transform: scale(1.15);
+    }
+
+    50% {
+      opacity: 0.6;
+    }
+
+    /* pause */
+    65%,
+    100% {
+      opacity: 0;
+      transform: scale(0.7);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-spark,
+    .animate-spark-fast {
+      animation: none;
+    }
   }
 }

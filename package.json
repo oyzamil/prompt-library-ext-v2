@@ -1,8 +1,8 @@
 {
-  "name": "prompt-library",
+  "name": "prompt-library-ext",
   "description": "Save, organize, and access your most-used prompts in seconds with Propmt Library.",
   "private": true,
-  "version": "0.0.4",
+  "version": "0.0.5",
   "type": "module",
   "scripts": {
     "dev": "wxt",
@@ -13,10 +13,11 @@
     "zip:firefox": "wxt zip -b firefox",
     "compile": "tsc --noEmit",
     "postinstall": "wxt prepare",
-    "git-remove": "bun run ./scripts/git-helper.js remove-git",
-    "git-change": "bun run ./scripts/git-helper.js change-repo",
-    "git-show": "bun run ./scripts/git-helper.js show-git",
-    "git-add": "bun run ./scripts/git-helper.js add-git",
+    "git-remove": "bun run ./scripts/git-helper.ts remove-git",
+    "git-change": "bun run ./scripts/git-helper.ts change-repo",
+    "git-show": "bun run ./scripts/git-helper.ts show-git",
+    "git-add": "bun run ./scripts/git-helper.ts add-git",
+    "git": "bun run ./scripts/git-helper.ts add-git",
     "format": "prettier --write ."
   },
   "dependencies": {

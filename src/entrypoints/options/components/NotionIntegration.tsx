@@ -48,7 +48,7 @@ const NotionIntegration: React.FC<NotionIntegrationProps> = () => {
   const loadSettings = async () => {
     try {
       setIsLoading(true);
-      const result = await browser.storage.sync.get(['notionApiKey', 'notionDatabaseId', 'notionSyncToNotionEnabled']);
+      const result = await browser.storage.sync.get(['notionApiKey', 'notionDatabaseId', 'notionSyncToNotionEnabled']) as any;
       setApiKey(result.notionApiKey || '');
       setDatabaseId(result.notionDatabaseId || '');
       setIsSyncToNotionEnabled(result.notionSyncToNotionEnabled ?? false);

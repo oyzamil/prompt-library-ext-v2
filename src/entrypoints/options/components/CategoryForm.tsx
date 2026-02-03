@@ -8,7 +8,7 @@ interface CategoryFormProps {
   isEditing: boolean;
 }
 
-const appColor = useAppConfig().APP.COLOR_PRIMARY;
+const appColor = useAppConfig().APP.color;
 const CategoryForm = ({ onSubmit, initialData, onCancel, isEditing }: CategoryFormProps) => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -124,12 +124,14 @@ const CategoryForm = ({ onSubmit, initialData, onCancel, isEditing }: CategoryFo
           </div>
         </Form.Item>
 
-        <Form.Item className="mt-4 flex">
-          <label className="relative flex items-center cursor-pointer">
-            <Switch checked={enabled} onChange={(checked) => setEnabled(checked)} />
-            <span className="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">{enabled ? t('enabled') : t('disabled')}</span>
-          </label>
-          <span className="text-gray-400 dark:text-gray-500 font-normal">({t('disabledTips')})</span>
+        <Form.Item className="mt-4">
+          <div className="flex justify-between">
+            <label className="relative flex items-center cursor-pointer">
+              <Switch checked={enabled} onChange={(checked) => setEnabled(checked)} />
+              <span className="ml-3 text-sm font-medium">{enabled ? t('enabled') : t('disabled')}</span>
+            </label>
+            <span className="text-theme-dim text-sm">({t('disabledTips')})</span>
+          </div>
         </Form.Item>
 
         <div className="flex justify-end gap-3">

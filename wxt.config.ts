@@ -1,7 +1,7 @@
-import { defineConfig } from 'wxt';
 import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
 import removeConsole from 'vite-plugin-remove-console';
+import { defineConfig } from 'wxt';
 import appConfig from './src/app.config';
 
 // See https://wxt.dev/api/config.html
@@ -31,7 +31,7 @@ export default defineConfig({
 
     // development
     const manifestBase: any = {
-      name: appConfig.APP.NAME,
+      name: appConfig.APP.fullName,
       description: '__MSG_appDescription__',
       default_locale: 'en',
       permissions: ['storage', 'contextMenus', 'identity'],
@@ -65,12 +65,13 @@ export default defineConfig({
     if (browser === 'firefox') {
       manifestBase.browser_specific_settings = {
         gecko: {
-          id: import.meta.env.WXT_FIREFOX_EXTENSION_ID,
+          data_collection_permissions: {
+            required: ['none'],
+          },
         },
       };
     }
     if (mode === 'development') {
-      console.log(browser);
       manifestBase.key =
         'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1gIStuzmtlJx9myPcEdZVB6fN6HZ4RDB2FNbhhhd1Q8kopHP3uZioJmGAbZch13CNg4nwDLzkT/Iv+SuQ92r6wEYf14rwv0pyLvegLlTWcKvpG+XfJXMl0AT32Gj2tuOoMceEpNRXZzcPf2QTftX4Lm3Kzv3kmeaIzHps1ajkT18iagllKExzmiQVZjCw/t8NYcY5cdjKQRhQqDTDqv5HnVanucEWmDPMb+AlyHOqAYxDurSt/IX1C5TW/khkCU8Fahcnw50ppVgIVKT7OLtSKDDNlqbC4BWIFWu55S5UR/CZNEbyjDtxzLkfVTi8sov7ZOUCTjEvRwjNmwXbo8PZwIDAQAB';
     }

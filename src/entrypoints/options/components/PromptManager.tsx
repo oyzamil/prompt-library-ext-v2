@@ -36,7 +36,7 @@ const PromptManager = () => {
         await migratePromptsWithCategory();
         const loadedPrompts = await storage.getItem<PromptItem[]>(`local:${BROWSER_STORAGE_KEY}`);
 
-        const storedPrompts = !settings.isLicensed ? loadedPrompts?.slice(0, settings.freeUserLimit) : loadedPrompts;
+        const storedPrompts = !settings.licenseInfo.isLicensed ? loadedPrompts?.slice(0, settings.freeUserLimit) : loadedPrompts;
 
         const sortedPrompts = (storedPrompts || []).sort((a, b) => {
           if (a.pinned && !b.pinned) return -1;
@@ -51,7 +51,7 @@ const PromptManager = () => {
         setCategories(await getCategories());
 
         // Calculate limit here directly
-        setIsLimited(!settings.isLicensed && (sortedPrompts?.length ?? 0) >= settings.freeUserLimit);
+        setIsLimited(!settings.licenseInfo.isLicensed && (sortedPrompts?.length ?? 0) >= settings.freeUserLimit);
       } catch (err) {
         console.error(t('optionsPageLoadDataError'), err);
         setError(t('loadDataFailed'));
@@ -117,9 +117,9 @@ const PromptManager = () => {
   // Save prompts to storage
   const savePrompts = async (newPrompts: PromptItem[]) => {
     try {
-      setIsLimited(!settings.isLicensed && (newPrompts?.length ?? 0) >= settings.freeUserLimit);
+      setIsLimited(!settings.licenseInfo.isLicensed && (newPrompts?.length ?? 0) >= settings.freeUserLimit);
 
-      const storedPrompts = !settings.isLicensed ? newPrompts?.slice(0, settings.freeUserLimit) : newPrompts;
+      const storedPrompts = !settings.licenseInfo.isLicensed ? newPrompts?.slice(0, settings.freeUserLimit) : newPrompts;
 
       await storage.setItem<PromptItem[]>(`local:${BROWSER_STORAGE_KEY}`, storedPrompts);
       console.log(t('optionsPagePromptsSaved'));
@@ -513,7 +513,7 @@ const PromptManager = () => {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <SectionHeading
           title={t('promptLibrary')}
@@ -528,7 +528,7 @@ const PromptManager = () => {
             {
               label: t('totalCount'),
               count: prompts.length.toString(),
-              color: useAppConfig().APP.COLOR_PRIMARY,
+              color: useAppConfig().APP.color,
             },
             {
               label: t('enabledCount'),

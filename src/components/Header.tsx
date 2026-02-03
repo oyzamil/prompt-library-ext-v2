@@ -1,42 +1,30 @@
-import logo from '@/assets/icon.png';
 import { CrownOutlined, KeyOutlined } from '@ant-design/icons';
-import { Avatar, Button, Tooltip } from 'antd';
-import clsx from 'clsx';
+import { Button, Tooltip } from 'antd';
 
 const { APP } = useAppConfig();
 
-const HeaderButtons = () => {
+function Header() {
   const { settings, saveSettings } = useSettings();
 
   return (
     <>
-      <div className="flex justify-between items-center gap-2 w-full">
-        <Tooltip title={settings?.isLicensed ? 'Premium User' : 'Buy / Activate'} defaultOpen={!settings?.isLicensed}>
-          <Button
-            type="primary"
-            onClick={() => {
-              saveSettings({ licenseModalVisible: true });
-            }}
-            icon={settings?.isLicensed ? <CrownOutlined /> : <KeyOutlined />}
-            disabled={settings?.isLicensed}
-          />
-        </Tooltip>
-      </div>
-    </>
-  );
-};
-
-function Header() {
-  return (
-    <>
-      <header className={'border-gray-200 px-2 flex py-3 items-center -mt-0.5 w-full z-51 bg-app-500/20'}>
-        <Avatar src={logo} shape="square" className="size-12 mx-0.5 mr-2 border-none" alt="logo" />
-        <div className="flex flex-col flex-1">
-          <h1 className="text-md font-bold">{APP.NAME}</h1>
-          <span className={clsx('text-gray-500', 'text-[12px]')}>{APP.TAGLINE}</span>
-        </div>
+      <header className={'bg-app-500 z-51 flex w-full items-center px-2 py-3 dark:bg-black border-b border-theme'}>
+        <Watermark className="w-full text-2xl" tagline={APP.tagLine} taglineClassName="text-[12px] text-theme-dim text-app-300" />
         <div className="flex flex-col items-end">
-          <HeaderButtons />
+          {/* Header buttons  */}
+          <div className="flex justify-between items-center gap-2 w-full">
+            <Tooltip title={settings.licenseInfo.isLicensed ? 'Premium User' : 'Buy / Activate'} defaultOpen={!settings.licenseInfo.isLicensed}>
+              <Button
+                type="primary"
+                className="bg-app-700 dark:bg-app-900/50 border-none"
+                onClick={() => {
+                  saveSettings({ licenseModalVisible: true });
+                }}
+                icon={settings.licenseInfo.isLicensed ? <CrownOutlined /> : <KeyOutlined />}
+                disabled={settings.licenseInfo.isLicensed}
+              />
+            </Tooltip>
+          </div>
         </div>
       </header>
     </>

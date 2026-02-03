@@ -162,7 +162,7 @@ const PromptForm = ({ onSubmit, initialData, onCancel, isEditing }: PromptFormPr
         <Form.Item
           label={
             <>
-              {t('tagsLabel')} <span className="text-gray-400 font-normal">({t('tagsOptional')})</span>
+              {t('tagsLabel')} <span className="text-theme-dim font-normal">({t('tagsOptional')})</span>
             </>
           }
         >
@@ -173,7 +173,7 @@ const PromptForm = ({ onSubmit, initialData, onCancel, isEditing }: PromptFormPr
         <Form.Item
           label={
             <>
-              {t('notesLabel')} <span className="text-gray-400 font-normal">({t('notesOptional')})</span>
+              {t('notesLabel')} <span className="text-theme-dim font-normal">({t('notesOptional')})</span>
             </>
           }
         >
@@ -184,8 +184,8 @@ const PromptForm = ({ onSubmit, initialData, onCancel, isEditing }: PromptFormPr
         {/* ENABLED SWITCH */}
         <Form.Item>
           <Switch checked={enabled} onChange={(checked) => setEnabled(checked)} />{' '}
-          <span className="ml-2 text-xs font-medium text-gray-700">
-            {enabled ? t('enabledStatus') : t('disabledStatus')} <span className="text-gray-400 font-normal ml-2">({t('disabledStatusTip')})</span>
+          <span className="ml-2 text-xs font-medium">
+            {enabled ? t('enabledStatus') : t('disabledStatus')} <span className="text-theme-dim font-normal ml-2">({t('disabledStatusTip')})</span>
           </span>
         </Form.Item>
         {/* ACTION BUTTONS */}

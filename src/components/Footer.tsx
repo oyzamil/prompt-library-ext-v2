@@ -1,7 +1,7 @@
 function Footer() {
   const { settings } = useSettings();
 
-  return <>{settings?.isLicensed}</>;
+  return <>{settings.licenseInfo.isLicensed}</>;
 }
 
 export default Footer;

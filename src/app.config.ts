@@ -1,23 +1,29 @@
 import { defineAppConfig } from 'wxt/utils/define-app-config';
 export const config = {
   APP: {
-    NAME: 'Prompt Library',
-    TAGLINE: 'Organize, save and manage your prompts',
-    DEVELOPER_MAIL: 'qazi.web@gmail.com',
-    COLOR_PRIMARY: '#187b4d',
-    FONT_FAMILY: 'Poppins',
+    name: 'Prompt Library',
+    fullName: 'Propmt Library: LLM Prompt Saver & Organizer',
+    tagLine: 'Organize, save and manage your prompts',
+    color: '#006251',
+    font: 'Poppins',
+    storageBucket: 'prompt-library-settings',
+    extensionPage: 'https://softwebtuts.com/prompt-library-browser-extension/',
   },
   SETTINGS: {
     theme: 'light' as 'light' | 'dark' | 'system',
     email: null as string | null,
-    isLicensed: false,
     licenseModalVisible: false,
-    freeUserLimit: 15,
+    freeUserLimit: 20,
     licenseInfo: {
-      licenseKey: null as string | null,
-      subscriptionId: null as string | null,
-      status: null as string | null,
-      verificationDate: null as string | null,
+      email: null as string | null,
+      isLicensed: false,
+      licenseKey: null as null | string,
+      verificationDate: '' as string | number,
+      consecutiveFailures: 0 as number,
+      subscriptionId: null as null | string,
+      subscriptionStatus: 'inactive',
+      lastSuccessfulCheck: '' as string,
+      error: '' as string,
     },
     closeModalOnOutsideClick: true as boolean,
   },
@@ -33,7 +39,7 @@ export const config = {
 
 export default defineAppConfig(config);
 
-export type AppSettings = typeof config.SETTINGS;
+export type Settings = typeof config.SETTINGS;
 
 declare module 'wxt/utils/define-app-config' {
   export interface WxtAppConfig {

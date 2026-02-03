@@ -189,7 +189,7 @@ function App() {
             <div className="text-red-500 text-center text-sm dark:text-red-400">{error}</div>
           ) : (
             <>
-              <span className="font-digital text-9xl text-app-500">{promptCount}</span>
+              <span className="font-digital text-9xl text-app-500 dark:text-white">{promptCount}</span>
               <p>Available Prompts</p>
             </>
           )}

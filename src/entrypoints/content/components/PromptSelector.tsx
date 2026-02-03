@@ -1,9 +1,9 @@
+import { ContentScriptContext } from '#imports';
+import { createAndMountUI, useAntd } from '@/providers/ThemeProvider';
+import { CopyOutlined } from '@ant-design/icons';
+import { Button, Input, InputRef, Select, Tag } from 'antd';
 import { extractVariables } from '../utils/variableParser';
 import { VariableInputModal } from './VariableInput';
-import { Button, Input, InputRef, Select, Tag } from 'antd';
-import { CopyOutlined } from '@ant-design/icons';
-import { createAndMountUI, useAntd } from '@/providers/ThemeProvider';
-import { ContentScriptContext } from '#imports';
 
 interface PromptSelectorProps {
   ctx: ContentScriptContext;
@@ -394,8 +394,8 @@ const PromptSelector: React.FC<PromptSelectorProps> = ({ ctx, prompts, targetEle
 
     el.style.setProperty('--mouse-x', `${x}px`);
     el.style.setProperty('--mouse-y', `${y}px`);
-    el.style.setProperty('--spot-color', useAppConfig().APP.COLOR_PRIMARY);
-    el.style.setProperty('--spot-color-light', `${useAppConfig().APP.COLOR_PRIMARY}1A`);
+    el.style.setProperty('--spot-color', useAppConfig().APP.color);
+    el.style.setProperty('--spot-color-light', `${useAppConfig().APP.color}1A`);
   };
 
   return (
@@ -431,7 +431,7 @@ const PromptSelector: React.FC<PromptSelectorProps> = ({ ctx, prompts, targetEle
           </Select>
         </div>
 
-        <div ref={listRef} className="flex flex-col max-h-86.25 overflow-y-scroll prompt-items">
+        <div ref={listRef} className="flex flex-col max-h-86.26 overflow-y-scroll prompt-items">
           {filteredPrompts.length > 0 ? (
             filteredPrompts.map((prompt, index) => {
               const category = categoriesMap[prompt.categoryId];
@@ -439,7 +439,7 @@ const PromptSelector: React.FC<PromptSelectorProps> = ({ ctx, prompts, targetEle
                 <div
                   id={`prompt-item-${index}`}
                   key={prompt.id}
-                  className={`${index === selectedIndex ? 'selected-item' : ' '} prompt-item`}
+                  className={cn('prompt-item', index === selectedIndex && 'active')}
                   onClick={() => applyPrompt(prompt)}
                   onMouseEnter={() => !isKeyboardNav && setSelectedIndex(index)}
                   onMouseMove={handlePromptHover}
@@ -455,8 +455,8 @@ const PromptSelector: React.FC<PromptSelectorProps> = ({ ctx, prompts, targetEle
 
                   <div className="meta z-50">
                     {category && (
-                      <Tag color={useAppConfig().APP.COLOR_PRIMARY}>
-                        <span className="size-2 inline-block rounded-full mr-1 border border-white" style={{ backgroundColor: category.color || useAppConfig().APP.COLOR_PRIMARY }}></span>
+                      <Tag color={useAppConfig().APP.color}>
+                        <span className="size-2 inline-block rounded-full mr-1 border border-theme" style={{ backgroundColor: category.color || useAppConfig().APP.color }}></span>
                         <span>{category.name}</span>
                       </Tag>
                     )}
@@ -469,7 +469,7 @@ const PromptSelector: React.FC<PromptSelectorProps> = ({ ctx, prompts, targetEle
               );
             })
           ) : (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-theme">
               <p className="text-lg mb-2">{searchTerm || selectedCategoryId ? t('noMatchingPrompts') : t('noAvailablePrompts')}</p>
               <p className="text-sm">
                 {searchTerm && selectedCategoryId ? t('tryChangingSearchOrCategory') : searchTerm ? t('tryOtherKeywords') : selectedCategoryId ? t('noCategoryPrompts') : t('pleaseAddPrompts')}
@@ -478,7 +478,7 @@ const PromptSelector: React.FC<PromptSelectorProps> = ({ ctx, prompts, targetEle
           )}
         </div>
 
-        <div className="flex justify-between text-xs p-2 bg-gray-100">
+        <div className="flex justify-between text-xs p-2">
           <span>
             {t('total')} {filteredPrompts.length} {t('prompts')}
           </span>
